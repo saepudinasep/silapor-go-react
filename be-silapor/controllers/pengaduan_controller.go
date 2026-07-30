@@ -43,10 +43,12 @@ func (ctl *PengaduanController) CreatePengaduan(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"success": true, "message": "pengaduan berhasil dikirim", "data": p})
 }
 
-// GetAllPengaduan handles GET /api/v1/pengaduan?status=baru (petugas/admin)
+// GetAllPengaduan handles GET /api/v1/pengaduan?status=baru&start_date=2026-01-01&end_date=2026-01-31 (petugas/admin)
 func (ctl *PengaduanController) GetAllPengaduan(c *fiber.Ctx) error {
 	status := c.Query("status", "")
-	list, err := ctl.pengaduanService.GetAll(status)
+	startDate := c.Query("start_date", "")
+	endDate := c.Query("end_date", "")
+	list, err := ctl.pengaduanService.GetAll(status, startDate, endDate)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"success": false, "message": err.Error()})
 	}

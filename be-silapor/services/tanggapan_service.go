@@ -43,7 +43,7 @@ func (s *tanggapanService) Create(idPengaduan, idPetugas uint, isi string) (*mod
 		Isi:          isi,
 	}
 	if err := s.tanggapanRepo.Create(t); err != nil {
-		return nil, err
+		return nil, FriendlyDBError("create tanggapan", err)
 	}
 
 	// otomatis ubah status pengaduan jadi "proses" jika masih "baru"
@@ -62,17 +62,20 @@ func (s *tanggapanService) GetByPengaduanID(idPengaduan uint) ([]models.Tanggapa
 func (s *tanggapanService) Update(id uint, isi string) (*models.Tanggapan, error) {
 	t, err := s.tanggapanRepo.FindByID(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("tanggapan tidak ditemukan")
 	}
 	if isi != "" {
 		t.Isi = isi
 	}
 	if err := s.tanggapanRepo.Update(t); err != nil {
-		return nil, err
+		return nil, FriendlyDBError("update tanggapan", err)
 	}
 	return t, nil
 }
 
 func (s *tanggapanService) Delete(id uint) error {
-	return s.tanggapanRepo.Delete(id)
+	if err := s.tanggapanRepo.Delete(id); err != nil {
+		return FriendlyDBError("delete tanggapan", err)
+	}
+	return nil
 }

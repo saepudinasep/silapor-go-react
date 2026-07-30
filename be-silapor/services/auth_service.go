@@ -60,7 +60,7 @@ func (s *authService) RegisterMasyarakat(nik, nama, username, password, telp str
 	}
 
 	if err := s.masyarakatRepo.Create(m); err != nil {
-		return nil, err
+		return nil, FriendlyDBError("register masyarakat", err)
 	}
 	return m, nil
 }

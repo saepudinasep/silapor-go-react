@@ -25,12 +25,14 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	pengaduanService := services.NewPengaduanService(pengaduanRepo)
 	tanggapanService := services.NewTanggapanService(tanggapanRepo, pengaduanRepo)
 	petugasService := services.NewPetugasService(petugasRepo)
+	profileService := services.NewProfileService(masyarakatRepo, petugasRepo)
 
 	// controllers
 	authController := controllers.NewAuthController(authService)
 	pengaduanController := controllers.NewPengaduanController(pengaduanService, cfg.UploadDir)
 	tanggapanController := controllers.NewTanggapanController(tanggapanService)
 	petugasController := controllers.NewPetugasController(petugasService)
+	profileController := controllers.NewProfileController(profileService)
 
 	// health check
 	app.Get("/health", func(c *fiber.Ctx) error {
@@ -74,4 +76,10 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	petugas.Put("/:id", petugasController.UpdatePetugas)
 	petugas.Put("/:id/reset-password", petugasController.ResetPassword)
 	petugas.Delete("/:id", petugasController.DeletePetugas)
+
+	// ---------------- PROFIL AKUN SENDIRI (semua role) ----------------
+	profile := api.Group("/profile", authMW)
+	profile.Get("/", profileController.GetProfile)
+	profile.Put("/", profileController.UpdateProfile)
+	profile.Put("/password", profileController.ChangePassword)
 }

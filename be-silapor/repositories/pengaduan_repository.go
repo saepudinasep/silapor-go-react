@@ -9,7 +9,7 @@ import (
 // PengaduanRepository defines the data-access contract for Pengaduan.
 type PengaduanRepository interface {
 	Create(p *models.Pengaduan) error
-	FindAll(status string) ([]models.Pengaduan, error)
+	FindAll(status, startDate, endDate string) ([]models.Pengaduan, error)
 	FindByNIK(nik string) ([]models.Pengaduan, error)
 	FindByID(id uint) (*models.Pengaduan, error)
 	Update(p *models.Pengaduan) error
@@ -30,11 +30,20 @@ func (r *pengaduanRepository) Create(p *models.Pengaduan) error {
 	return r.db.Create(p).Error
 }
 
-func (r *pengaduanRepository) FindAll(status string) ([]models.Pengaduan, error) {
+// FindAll mengambil daftar pengaduan, opsional difilter berdasarkan status
+// dan/atau rentang tanggal (format "YYYY-MM-DD"). Dipakai baik untuk daftar
+// pengaduan biasa maupun untuk generate laporan rekap.
+func (r *pengaduanRepository) FindAll(status, startDate, endDate string) ([]models.Pengaduan, error) {
 	var list []models.Pengaduan
 	q := r.db.Preload("Masyarakat").Order("tgl_pengaduan desc")
 	if status != "" {
 		q = q.Where("status = ?", status)
+	}
+	if startDate != "" {
+		q = q.Where("tgl_pengaduan >= ?", startDate+" 00:00:00")
+	}
+	if endDate != "" {
+		q = q.Where("tgl_pengaduan <= ?", endDate+" 23:59:59")
 	}
 	err := q.Find(&list).Error
 	return list, err

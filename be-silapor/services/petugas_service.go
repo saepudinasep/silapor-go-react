@@ -49,7 +49,7 @@ func (s *petugasService) Create(nama, username, password, telp, level string) (*
 		Level:       level,
 	}
 	if err := s.repo.Create(p); err != nil {
-		return nil, err
+		return nil, FriendlyDBError("create petugas", err)
 	}
 	return p, nil
 }
@@ -65,7 +65,7 @@ func (s *petugasService) GetByID(id uint) (*models.Petugas, error) {
 func (s *petugasService) Update(id uint, nama, telp, level string) (*models.Petugas, error) {
 	p, err := s.repo.FindByID(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("petugas tidak ditemukan")
 	}
 	if nama != "" {
 		p.NamaPetugas = nama
@@ -77,7 +77,7 @@ func (s *petugasService) Update(id uint, nama, telp, level string) (*models.Petu
 		p.Level = level
 	}
 	if err := s.repo.Update(p); err != nil {
-		return nil, err
+		return nil, FriendlyDBError("update petugas", err)
 	}
 	return p, nil
 }
@@ -85,16 +85,22 @@ func (s *petugasService) Update(id uint, nama, telp, level string) (*models.Petu
 func (s *petugasService) ResetPassword(id uint, newPassword string) error {
 	p, err := s.repo.FindByID(id)
 	if err != nil {
-		return err
+		return errors.New("petugas tidak ditemukan")
 	}
 	hashed, err := middleware.HashPassword(newPassword)
 	if err != nil {
 		return err
 	}
 	p.Password = hashed
-	return s.repo.Update(p)
+	if err := s.repo.Update(p); err != nil {
+		return FriendlyDBError("reset password petugas", err)
+	}
+	return nil
 }
 
 func (s *petugasService) Delete(id uint) error {
-	return s.repo.Delete(id)
+	if err := s.repo.Delete(id); err != nil {
+		return FriendlyDBError("delete petugas", err)
+	}
+	return nil
 }

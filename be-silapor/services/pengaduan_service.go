@@ -11,7 +11,7 @@ import (
 // PengaduanService defines the business logic contract for Pengaduan.
 type PengaduanService interface {
 	Create(nik, isiLaporan, foto string) (*models.Pengaduan, error)
-	GetAll(status string) ([]models.Pengaduan, error)
+	GetAll(status, startDate, endDate string) ([]models.Pengaduan, error)
 	GetByNIK(nik string) ([]models.Pengaduan, error)
 	GetByID(id uint) (*models.Pengaduan, error)
 	UpdateStatus(id uint, status string) (*models.Pengaduan, error)
@@ -42,13 +42,13 @@ func (s *pengaduanService) Create(nik, isiLaporan, foto string) (*models.Pengadu
 	}
 
 	if err := s.repo.Create(p); err != nil {
-		return nil, err
+		return nil, FriendlyDBError("create pengaduan", err)
 	}
 	return p, nil
 }
 
-func (s *pengaduanService) GetAll(status string) ([]models.Pengaduan, error) {
-	return s.repo.FindAll(status)
+func (s *pengaduanService) GetAll(status, startDate, endDate string) ([]models.Pengaduan, error) {
+	return s.repo.FindAll(status, startDate, endDate)
 }
 
 func (s *pengaduanService) GetByNIK(nik string) ([]models.Pengaduan, error) {
@@ -66,18 +66,21 @@ func (s *pengaduanService) UpdateStatus(id uint, status string) (*models.Pengadu
 
 	p, err := s.repo.FindByID(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("pengaduan tidak ditemukan")
 	}
 	p.Status = status
 
 	if err := s.repo.Update(p); err != nil {
-		return nil, err
+		return nil, FriendlyDBError("update status pengaduan", err)
 	}
 	return p, nil
 }
 
 func (s *pengaduanService) Delete(id uint) error {
-	return s.repo.Delete(id)
+	if err := s.repo.Delete(id); err != nil {
+		return FriendlyDBError("delete pengaduan", err)
+	}
+	return nil
 }
 
 func (s *pengaduanService) Summary() (map[string]int64, error) {

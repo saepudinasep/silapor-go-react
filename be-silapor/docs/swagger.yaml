@@ -78,13 +78,21 @@ paths:
       responses:
         "201": { description: Pengaduan berhasil dikirim }
     get:
-      summary: List semua pengaduan (petugas/admin), filter opsional ?status=
+      summary: List semua pengaduan (petugas/admin), filter opsional status & rentang tanggal
       tags: [Pengaduan]
       security: [{ bearerAuth: [] }]
       parameters:
         - name: status
           in: query
           schema: { type: string, enum: [baru, proses, selesai] }
+        - name: start_date
+          in: query
+          description: Format YYYY-MM-DD
+          schema: { type: string }
+        - name: end_date
+          in: query
+          description: Format YYYY-MM-DD
+          schema: { type: string }
       responses:
         "200": { description: Daftar pengaduan }
 
@@ -164,7 +172,10 @@ paths:
               properties:
                 tanggapan: { type: string }
       responses:
-        "201": { description: Tanggapan ditambahkan; status pengaduan otomatis jadi "proses" jika masih "baru" }
+        "201":
+          {
+            description: Tanggapan ditambahkan; status pengaduan otomatis jadi "proses" jika masih "baru",
+          }
 
   /tanggapan/{id}:
     delete:
@@ -237,6 +248,47 @@ paths:
                 password: { type: string }
       responses:
         "200": { description: Password direset }
+
+  /profile:
+    get:
+      summary: Lihat profil akun sendiri (semua role)
+      tags: [Profile]
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Data profil }
+    put:
+      summary: Update nama/telp akun sendiri (semua role)
+      tags: [Profile]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nama: { type: string }
+                telp: { type: string }
+      responses:
+        "200": { description: Profil diperbarui }
+
+  /profile/password:
+    put:
+      summary: Ganti password akun sendiri (semua role)
+      tags: [Profile]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password_lama: { type: string }
+                password_baru: { type: string }
+      responses:
+        "200": { description: Password diperbarui }
+        "400": { description: Password lama tidak sesuai }
 
 components:
   securitySchemes:
