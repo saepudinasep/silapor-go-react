@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS masyarakat (
+    nik CHAR(16) PRIMARY KEY,
+    nama VARCHAR(60) NOT NULL,
+    username VARCHAR(25) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    telp VARCHAR(15),
+    created_at DATETIME NULL,
+    updated_at DATETIME NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

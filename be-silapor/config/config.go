@@ -8,54 +8,76 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// Config holds all application configuration loaded from environment variables.
 type Config struct {
 	AppName string
 	AppPort string
 	AppEnv  string
 
-	DBHost     string
-	DBPort     string
-	DBUser     string
-	DBPassword string
-	DBName     string
-	DBCharset  string
+	DBHost    string
+	DBPort    string
+	DBUser    string
+	DBPass    string
+	DBName    string
+	DBCharset string
 
 	JWTSecret       string
 	JWTExpiresHours int
 
-	SeedAdminEmail    string
+	UploadDir   string
+	MaxUploadMB int
+
+	SeedAdminUsername string
 	SeedAdminPassword string
 }
 
 var Cfg *Config
 
+// LoadConfig loads variables from .env (if present) into the process
+// environment and returns a populated Config struct.
 func LoadConfig() *Config {
 	if err := godotenv.Load(); err != nil {
 		log.Println("no .env file found, relying on system environment variables")
 	}
 
-	expiresHours, err := strconv.Atoi(os.Getenv("JWT_EXPIRES_HOURS"))
+	expiresHours, err := strconv.Atoi(getEnv("JWT_EXPIRES_HOURS", "24"))
 	if err != nil {
-		expiresHours = 24 // default to 24 hours if not set or invalid
+		expiresHours = 24
+	}
+
+	maxUploadMB, err := strconv.Atoi(getEnv("MAX_UPLOAD_MB", "5"))
+	if err != nil {
+		maxUploadMB = 5
 	}
 
 	Cfg = &Config{
-		AppName: os.Getenv("APP_NAME"),
-		AppPort: os.Getenv("APP_PORT"),
-		AppEnv:  os.Getenv("APP_ENV"),
+		AppName: getEnv("APP_NAME", "silapor-api"),
+		AppPort: getEnv("APP_PORT", "8080"),
+		AppEnv:  getEnv("APP_ENV", "local"),
 
-		DBHost:     os.Getenv("DB_HOST"),
-		DBPort:     os.Getenv("DB_PORT"),
-		DBUser:     os.Getenv("DB_USER"),
-		DBPassword: os.Getenv("DB_PASSWORD"),
-		DBName:     os.Getenv("DB_NAME"),
-		DBCharset:  os.Getenv("DB_CHARSET"),
+		DBHost:    getEnv("DB_HOST", "127.0.0.1"),
+		DBPort:    getEnv("DB_PORT", "3306"),
+		DBUser:    getEnv("DB_USER", "root"),
+		DBPass:    getEnv("DB_PASSWORD", ""),
+		DBName:    getEnv("DB_NAME", "silapor"),
+		DBCharset: getEnv("DB_CHARSET", "utf8mb4"),
 
-		JWTSecret:       os.Getenv("JWT_SECRET"),
+		JWTSecret:       getEnv("JWT_SECRET", "secret"),
 		JWTExpiresHours: expiresHours,
 
-		SeedAdminEmail:    os.Getenv("SEED_ADMIN_EMAIL"),
-		SeedAdminPassword: os.Getenv("SEED_ADMIN_PASSWORD"),
+		UploadDir:   getEnv("UPLOAD_DIR", "uploads"),
+		MaxUploadMB: maxUploadMB,
+
+		SeedAdminUsername: getEnv("SEED_ADMIN_USERNAME", "admin"),
+		SeedAdminPassword: getEnv("SEED_ADMIN_PASSWORD", "admin12345"),
 	}
+
 	return Cfg
+}
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok && value != "" {
+		return value
+	}
+	return fallback
 }

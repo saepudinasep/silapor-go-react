@@ -1,0 +1,246 @@
+openapi: 3.0.3
+info:
+  title: SiLapor API
+  description: >
+    REST API Sistem Informasi Pelaporan (Pengaduan) Masyarakat.
+    Role: Masyarakat (pelapor), Petugas (menanggapi), Admin (kelola petugas).
+  version: "1.0.0"
+servers:
+  - url: http://localhost:8080/api/v1
+
+paths:
+  /auth/masyarakat/register:
+    post:
+      summary: Registrasi akun masyarakat
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nik: { type: string, example: "3271010101990001" }
+                nama: { type: string }
+                username: { type: string }
+                password: { type: string }
+                telp: { type: string }
+      responses:
+        "201": { description: Registrasi berhasil }
+        "400": { description: NIK/username sudah terdaftar }
+
+  /auth/masyarakat/login:
+    post:
+      summary: Login masyarakat
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string }
+                password: { type: string }
+      responses:
+        "200": { description: Login berhasil, mengembalikan token JWT }
+
+  /auth/petugas/login:
+    post:
+      summary: Login petugas / admin
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string }
+                password: { type: string }
+      responses:
+        "200": { description: Login berhasil, mengembalikan token JWT }
+
+  /pengaduan:
+    post:
+      summary: Buat pengaduan baru (masyarakat, multipart/form-data)
+      tags: [Pengaduan]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                isi_laporan: { type: string }
+                foto: { type: string, format: binary }
+      responses:
+        "201": { description: Pengaduan berhasil dikirim }
+    get:
+      summary: List semua pengaduan (petugas/admin), filter opsional ?status=
+      tags: [Pengaduan]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [baru, proses, selesai] }
+      responses:
+        "200": { description: Daftar pengaduan }
+
+  /pengaduan/saya:
+    get:
+      summary: List pengaduan milik masyarakat yang login
+      tags: [Pengaduan]
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Daftar pengaduan milik sendiri }
+
+  /pengaduan/summary:
+    get:
+      summary: Ringkasan jumlah pengaduan per status (dashboard)
+      tags: [Pengaduan]
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: "{ baru, proses, selesai }" }
+
+  /pengaduan/{id}:
+    get:
+      summary: Detail pengaduan beserta tanggapan
+      tags: [Pengaduan]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200": { description: Detail pengaduan }
+    delete:
+      summary: Hapus pengaduan (admin)
+      tags: [Pengaduan]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200": { description: Pengaduan dihapus }
+
+  /pengaduan/{id}/status:
+    put:
+      summary: Update status pengaduan (petugas/admin)
+      tags: [Pengaduan]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string, enum: [baru, proses, selesai] }
+      responses:
+        "200": { description: Status diperbarui }
+
+  /pengaduan/{id}/tanggapan:
+    get:
+      summary: List tanggapan untuk sebuah pengaduan
+      tags: [Tanggapan]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200": { description: Daftar tanggapan }
+    post:
+      summary: Tambah tanggapan (petugas/admin)
+      tags: [Tanggapan]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tanggapan: { type: string }
+      responses:
+        "201": { description: Tanggapan ditambahkan; status pengaduan otomatis jadi "proses" jika masih "baru" }
+
+  /tanggapan/{id}:
+    delete:
+      summary: Hapus tanggapan (admin)
+      tags: [Tanggapan]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200": { description: Tanggapan dihapus }
+
+  /petugas:
+    post:
+      summary: Tambah akun petugas (admin)
+      tags: [Petugas]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nama_petugas: { type: string }
+                username: { type: string }
+                password: { type: string }
+                telp: { type: string }
+                level: { type: string, enum: [admin, petugas] }
+      responses:
+        "201": { description: Petugas ditambahkan }
+    get:
+      summary: List semua petugas (admin)
+      tags: [Petugas]
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Daftar petugas }
+
+  /petugas/{id}:
+    put:
+      summary: Update data petugas (admin)
+      tags: [Petugas]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200": { description: Petugas diperbarui }
+    delete:
+      summary: Hapus petugas (admin)
+      tags: [Petugas]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200": { description: Petugas dihapus }
+
+  /petugas/{id}/reset-password:
+    put:
+      summary: Reset password petugas (admin)
+      tags: [Petugas]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password: { type: string }
+      responses:
+        "200": { description: Password direset }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

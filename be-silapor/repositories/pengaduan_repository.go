@@ -1,0 +1,86 @@
+package repositories
+
+import (
+	"github.com/saepudinasep/silapor-go-react/be/models"
+
+	"gorm.io/gorm"
+)
+
+// PengaduanRepository defines the data-access contract for Pengaduan.
+type PengaduanRepository interface {
+	Create(p *models.Pengaduan) error
+	FindAll(status string) ([]models.Pengaduan, error)
+	FindByNIK(nik string) ([]models.Pengaduan, error)
+	FindByID(id uint) (*models.Pengaduan, error)
+	Update(p *models.Pengaduan) error
+	Delete(id uint) error
+	CountByStatus() (map[string]int64, error)
+}
+
+type pengaduanRepository struct {
+	db *gorm.DB
+}
+
+// NewPengaduanRepository builds a PengaduanRepository backed by GORM/MySQL.
+func NewPengaduanRepository(db *gorm.DB) PengaduanRepository {
+	return &pengaduanRepository{db: db}
+}
+
+func (r *pengaduanRepository) Create(p *models.Pengaduan) error {
+	return r.db.Create(p).Error
+}
+
+func (r *pengaduanRepository) FindAll(status string) ([]models.Pengaduan, error) {
+	var list []models.Pengaduan
+	q := r.db.Preload("Masyarakat").Order("tgl_pengaduan desc")
+	if status != "" {
+		q = q.Where("status = ?", status)
+	}
+	err := q.Find(&list).Error
+	return list, err
+}
+
+func (r *pengaduanRepository) FindByNIK(nik string) ([]models.Pengaduan, error) {
+	var list []models.Pengaduan
+	err := r.db.Where("nik = ?", nik).Order("tgl_pengaduan desc").Find(&list).Error
+	return list, err
+}
+
+func (r *pengaduanRepository) FindByID(id uint) (*models.Pengaduan, error) {
+	var p models.Pengaduan
+	if err := r.db.Preload("Masyarakat").
+		Preload("Tanggapan").
+		Preload("Tanggapan.Petugas").
+		First(&p, id).Error; err != nil {
+		return nil, err
+	}
+	return &p, nil
+}
+
+func (r *pengaduanRepository) Update(p *models.Pengaduan) error {
+	return r.db.Save(p).Error
+}
+
+func (r *pengaduanRepository) Delete(id uint) error {
+	return r.db.Delete(&models.Pengaduan{}, id).Error
+}
+
+func (r *pengaduanRepository) CountByStatus() (map[string]int64, error) {
+	type row struct {
+		Status string
+		Total  int64
+	}
+	var rows []row
+	if err := r.db.Model(&models.Pengaduan{}).
+		Select("status, count(*) as total").
+		Group("status").
+		Scan(&rows).Error; err != nil {
+		return nil, err
+	}
+
+	result := map[string]int64{"baru": 0, "proses": 0, "selesai": 0}
+	for _, r := range rows {
+		result[r.Status] = r.Total
+	}
+	return result, nil
+}
