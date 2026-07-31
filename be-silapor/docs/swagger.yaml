@@ -9,6 +9,20 @@ servers:
   - url: http://localhost:8080/api/v1
 
 paths:
+  /public/beranda:
+    get:
+      summary: Data publik untuk landing page desa (TANPA login)
+      description: >
+        Mengembalikan ringkasan jumlah pengaduan per status dan cuplikan
+        pengaduan terbaru. Identitas pelapor disamarkan (mis. "Budi S.")
+        dan isi laporan dipotong maksimal 140 karakter demi privasi.
+      tags: [Public]
+      responses:
+        "200":
+          {
+            description: "{ summary: {total,baru,proses,selesai}, recent: [...] }",
+          }
+
   /auth/masyarakat/register:
     post:
       summary: Registrasi akun masyarakat

@@ -6,8 +6,8 @@ Repo: `github.com/saepudinasep/silapor-go-react`
 
 ```
 silapor-go-react/
-├── be/     ← Backend REST API (Go + Fiber + GORM + MySQL)
-└── fe/     ← Frontend (React + Vite)
+├── be-silapor/     ← Backend REST API (Go + Fiber + GORM + MySQL)
+└── fe-silapor/     ← Frontend (React + Vite)
 ```
 
 ---
@@ -37,10 +37,10 @@ go install -tags 'mysql' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
 ### Jalankan migration
 
-Dari folder `be/`:
+Dari folder `be-silapor/`:
 
 ```bash
-cd be
+cd be-silapor
 migrate -path database/migrations \
   -database "mysql://root:PASSWORD_KAMU@tcp(127.0.0.1:3306)/silapor" up
 ```
@@ -48,7 +48,6 @@ migrate -path database/migrations \
 Ganti `root:PASSWORD_KAMU` sesuai user & password MySQL kamu, dan `silapor` jika nama database berbeda.
 
 Perintah ini akan menjalankan berurutan:
-
 - `000001_create_masyarakat_table.up.sql`
 - `000002_create_petugas_table.up.sql`
 - `000003_create_pengaduan_table.up.sql`
@@ -70,10 +69,10 @@ migrate -path database/migrations \
 
 ---
 
-## 3. Menjalankan Backend (`be/`)
+## 3. Menjalankan Backend (`be-silapor/`)
 
 ```bash
-cd be
+cd be-silapor
 cp .env.example .env
 ```
 
@@ -95,36 +94,37 @@ Akun admin default (sesuai `.env`): `admin` / `admin12345` (ubah `SEED_ADMIN_USE
 
 ### Endpoint utama
 
-| Method   | Endpoint                           | Role                 | Keterangan                                                                  |
-| -------- | ---------------------------------- | -------------------- | --------------------------------------------------------------------------- |
-| POST     | /api/v1/auth/masyarakat/register   | Publik               | Registrasi masyarakat                                                       |
-| POST     | /api/v1/auth/masyarakat/login      | Publik               | Login masyarakat                                                            |
-| POST     | /api/v1/auth/petugas/login         | Publik               | Login petugas/admin                                                         |
-| POST     | /api/v1/pengaduan                  | Masyarakat           | Buat pengaduan (multipart, field `isi_laporan`, `foto`)                     |
-| GET      | /api/v1/pengaduan/saya             | Masyarakat           | List pengaduan milik sendiri                                                |
-| GET      | /api/v1/pengaduan                  | Petugas/Admin        | List semua pengaduan (`?status=&start_date=YYYY-MM-DD&end_date=YYYY-MM-DD`) |
-| GET      | /api/v1/pengaduan/summary          | Petugas/Admin        | Rekap jumlah per status                                                     |
-| GET      | /api/v1/pengaduan/:id              | Semua role terkait   | Detail pengaduan                                                            |
-| PUT      | /api/v1/pengaduan/:id/status       | Petugas/Admin        | Update status                                                               |
-| DELETE   | /api/v1/pengaduan/:id              | Admin                | Hapus pengaduan                                                             |
-| GET/POST | /api/v1/pengaduan/:id/tanggapan    | Petugas/Admin (post) | Lihat/kirim tanggapan                                                       |
-| DELETE   | /api/v1/tanggapan/:id              | Admin                | Hapus tanggapan                                                             |
-| POST/GET | /api/v1/petugas                    | Admin                | Kelola petugas                                                              |
-| PUT      | /api/v1/petugas/:id                | Admin                | Update petugas                                                              |
-| PUT      | /api/v1/petugas/:id/reset-password | Admin                | Reset password petugas                                                      |
-| DELETE   | /api/v1/petugas/:id                | Admin                | Hapus petugas                                                               |
-| GET      | /api/v1/profile                    | Semua role           | Lihat profil akun sendiri                                                   |
-| PUT      | /api/v1/profile                    | Semua role           | Update nama/telp akun sendiri                                               |
-| PUT      | /api/v1/profile/password           | Semua role           | Ganti password akun sendiri                                                 |
+| Method | Endpoint | Role | Keterangan |
+|---|---|---|---|
+| GET | /api/v1/public/beranda | Publik (tanpa login) | Ringkasan & cuplikan pengaduan terbaru untuk landing page |
+| POST | /api/v1/auth/masyarakat/register | Publik | Registrasi masyarakat |
+| POST | /api/v1/auth/masyarakat/login | Publik | Login masyarakat |
+| POST | /api/v1/auth/petugas/login | Publik | Login petugas/admin |
+| POST | /api/v1/pengaduan | Masyarakat | Buat pengaduan (multipart, field `isi_laporan`, `foto`) |
+| GET | /api/v1/pengaduan/saya | Masyarakat | List pengaduan milik sendiri |
+| GET | /api/v1/pengaduan | Petugas/Admin | List semua pengaduan (`?status=&start_date=YYYY-MM-DD&end_date=YYYY-MM-DD`) |
+| GET | /api/v1/pengaduan/summary | Petugas/Admin | Rekap jumlah per status |
+| GET | /api/v1/pengaduan/:id | Semua role terkait | Detail pengaduan |
+| PUT | /api/v1/pengaduan/:id/status | Petugas/Admin | Update status |
+| DELETE | /api/v1/pengaduan/:id | Admin | Hapus pengaduan |
+| GET/POST | /api/v1/pengaduan/:id/tanggapan | Petugas/Admin (post) | Lihat/kirim tanggapan |
+| DELETE | /api/v1/tanggapan/:id | Admin | Hapus tanggapan |
+| POST/GET | /api/v1/petugas | Admin | Kelola petugas |
+| PUT | /api/v1/petugas/:id | Admin | Update petugas |
+| PUT | /api/v1/petugas/:id/reset-password | Admin | Reset password petugas |
+| DELETE | /api/v1/petugas/:id | Admin | Hapus petugas |
+| GET | /api/v1/profile | Semua role | Lihat profil akun sendiri |
+| PUT | /api/v1/profile | Semua role | Update nama/telp akun sendiri |
+| PUT | /api/v1/profile/password | Semua role | Ganti password akun sendiri |
 
 Dokumentasi lengkap (OpenAPI): `be/docs/swagger.yaml` — import ke [Swagger Editor](https://editor.swagger.io/) untuk tampilan interaktif.
 
 ---
 
-## 4. Menjalankan Frontend (`fe/`)
+## 4. Menjalankan Frontend (`fe-silapor/`)
 
 ```bash
-cd fe
+cd fe-silapor
 cp .env.example .env
 npm install
 npm run dev
@@ -134,7 +134,7 @@ Frontend berjalan di `http://localhost:5173`. Pastikan `VITE_API_BASE_URL` di `.
 
 ### Alur halaman
 
-- `/` — landing page (pilih masuk sebagai masyarakat / petugas)
+- `/` — **landing page desa**: hero, statistik pengaduan (total/baru/proses/selesai), cuplikan pengaduan warga terbaru (nama disamarkan demi privasi), cara kerja, info kontak desa, CTA daftar/masuk
 - `/register`, `/login` — registrasi & login masyarakat
 - `/petugas/login` — login petugas/admin
 - `/pengaduan/baru` — form buat pengaduan (masyarakat)

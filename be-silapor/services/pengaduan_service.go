@@ -17,6 +17,7 @@ type PengaduanService interface {
 	UpdateStatus(id uint, status string) (*models.Pengaduan, error)
 	Delete(id uint) error
 	Summary() (map[string]int64, error)
+	GetRecent(limit int) ([]models.Pengaduan, error)
 }
 
 type pengaduanService struct {
@@ -85,4 +86,8 @@ func (s *pengaduanService) Delete(id uint) error {
 
 func (s *pengaduanService) Summary() (map[string]int64, error) {
 	return s.repo.CountByStatus()
+}
+
+func (s *pengaduanService) GetRecent(limit int) ([]models.Pengaduan, error) {
+	return s.repo.FindRecent(limit)
 }

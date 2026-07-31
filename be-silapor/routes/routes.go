@@ -45,6 +45,9 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	api := app.Group("/api/v1")
 	authMW := middleware.IsAuth(cfg.JWTSecret)
 
+	// ---------------- PUBLIK (tanpa login, untuk landing page desa) ----------------
+	api.Get("/public/beranda", pengaduanController.PublicBeranda)
+
 	// ---------------- AUTH (public) ----------------
 	auth := api.Group("/auth")
 	auth.Post("/masyarakat/register", authController.RegisterMasyarakat)

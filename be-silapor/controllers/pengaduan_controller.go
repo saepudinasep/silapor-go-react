@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/saepudinasep/silapor-go-react/be/services"
@@ -121,4 +122,84 @@ func (ctl *PengaduanController) Summary(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"success": false, "message": err.Error()})
 	}
 	return c.JSON(fiber.Map{"success": true, "data": summary})
+}
+
+// publicPengaduanItem adalah representasi pengaduan yang aman ditampilkan ke
+// publik (tanpa login): identitas pelapor disamarkan dan isi laporan
+// dipotong, supaya tidak membocorkan data pribadi warga.
+type publicPengaduanItem struct {
+	ID         uint   `json:"id_pengaduan"`
+	Tanggal    string `json:"tgl_pengaduan"`
+	IsiLaporan string `json:"isi_laporan"`
+	Status     string `json:"status"`
+	Pelapor    string `json:"pelapor"`
+}
+
+// maskName menyamarkan nama lengkap jadi "Nama Depan I." demi privasi
+// warga saat ditampilkan di halaman publik.
+func maskName(fullName string) string {
+	fullName = strings.TrimSpace(fullName)
+	if fullName == "" {
+		return "Warga"
+	}
+	parts := strings.Fields(fullName)
+	if len(parts) == 1 {
+		return parts[0]
+	}
+	initials := make([]string, 0, len(parts)-1)
+	for _, p := range parts[1:] {
+		if len(p) > 0 {
+			initials = append(initials, strings.ToUpper(string(p[0]))+".")
+		}
+	}
+	return parts[0] + " " + strings.Join(initials, " ")
+}
+
+func truncateText(s string, max int) string {
+	r := []rune(s)
+	if len(r) <= max {
+		return s
+	}
+	return string(r[:max]) + "..."
+}
+
+// PublicBeranda handles GET /api/v1/public/beranda — data ringkasan &
+// cuplikan pengaduan terbaru untuk landing page desa, dapat diakses TANPA
+// login. Tidak membocorkan NIK, username, telepon, atau isi laporan penuh.
+func (ctl *PengaduanController) PublicBeranda(c *fiber.Ctx) error {
+	summary, err := ctl.pengaduanService.Summary()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"success": false, "message": "gagal memuat data"})
+	}
+
+	recent, err := ctl.pengaduanService.GetRecent(8)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"success": false, "message": "gagal memuat data"})
+	}
+
+	items := make([]publicPengaduanItem, 0, len(recent))
+	for _, p := range recent {
+		items = append(items, publicPengaduanItem{
+			ID:         p.IDPengaduan,
+			Tanggal:    p.TglPengaduan.Format(time.RFC3339),
+			IsiLaporan: truncateText(p.IsiLaporan, 140),
+			Status:     p.Status,
+			Pelapor:    maskName(p.Masyarakat.Nama),
+		})
+	}
+
+	total := summary["baru"] + summary["proses"] + summary["selesai"]
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"data": fiber.Map{
+			"summary": fiber.Map{
+				"total":   total,
+				"baru":    summary["baru"],
+				"proses":  summary["proses"],
+				"selesai": summary["selesai"],
+			},
+			"recent": items,
+		},
+	})
 }

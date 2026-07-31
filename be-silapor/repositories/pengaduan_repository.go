@@ -15,6 +15,7 @@ type PengaduanRepository interface {
 	Update(p *models.Pengaduan) error
 	Delete(id uint) error
 	CountByStatus() (map[string]int64, error)
+	FindRecent(limit int) ([]models.Pengaduan, error)
 }
 
 type pengaduanRepository struct {
@@ -92,4 +93,12 @@ func (r *pengaduanRepository) CountByStatus() (map[string]int64, error) {
 		result[r.Status] = r.Total
 	}
 	return result, nil
+}
+
+// FindRecent mengambil N pengaduan terbaru (semua status), dipakai untuk
+// menampilkan cuplikan pengaduan di landing page publik desa.
+func (r *pengaduanRepository) FindRecent(limit int) ([]models.Pengaduan, error) {
+	var list []models.Pengaduan
+	err := r.db.Preload("Masyarakat").Order("tgl_pengaduan desc").Limit(limit).Find(&list).Error
+	return list, err
 }
