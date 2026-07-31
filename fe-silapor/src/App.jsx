@@ -8,6 +8,8 @@ import PengaduanSaya from './pages/PengaduanSaya.jsx'
 import PengaduanDetail from './pages/PengaduanDetail.jsx'
 import DashboardPetugas from './pages/DashboardPetugas.jsx'
 import PetugasManage from './pages/PetugasManage.jsx'
+import GenerateLaporan from './pages/GenerateLaporan.jsx'
+import Settings from './pages/Settings.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 
 export default function App() {
@@ -63,6 +65,26 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={['admin']}>
             <PetugasManage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Generate Laporan - petugas & admin */}
+      <Route
+        path="/laporan"
+        element={
+          <ProtectedRoute allowedRoles={['petugas', 'admin']}>
+            <GenerateLaporan />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Pengaturan akun - semua role yang sudah login */}
+      <Route
+        path="/pengaturan"
+        element={
+          <ProtectedRoute allowedRoles={['masyarakat', 'petugas', 'admin']}>
+            <Settings />
           </ProtectedRoute>
         }
       />

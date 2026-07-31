@@ -2,12 +2,12 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/axios.js'
 import Layout from '../components/Layout.jsx'
+import { alertSuccess, alertError } from '../utils/swal.js'
 
 export default function PengaduanForm() {
   const [isiLaporan, setIsiLaporan] = useState('')
   const [foto, setFoto] = useState(null)
   const [fotoName, setFotoName] = useState('')
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
@@ -19,7 +19,6 @@ export default function PengaduanForm() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    setError('')
     setLoading(true)
     try {
       const formData = new FormData()
@@ -29,9 +28,10 @@ export default function PengaduanForm() {
       await api.post('/pengaduan', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
+      await alertSuccess('Pengaduan terkirim', 'Laporan Anda akan segera ditinjau petugas')
       navigate('/pengaduan/saya')
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal mengirim pengaduan')
+      alertError('Gagal mengirim pengaduan', err.response?.data?.message)
     } finally {
       setLoading(false)
     }
@@ -40,8 +40,6 @@ export default function PengaduanForm() {
   return (
     <Layout title="Buat Laporan" eyebrow="Masyarakat">
       <div className="card" style={{ maxWidth: 560 }}>
-        {error && <div className="error-text">{error}</div>}
-
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Isi Laporan</label>

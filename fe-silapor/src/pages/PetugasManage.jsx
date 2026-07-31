@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react'
 import api from '../api/axios.js'
 import Layout from '../components/Layout.jsx'
+import { alertSuccess, alertError, confirmAction, promptInput } from '../utils/swal.js'
 
 const emptyForm = { nama_petugas: '', username: '', password: '', telp: '', level: 'petugas' }
 
 export default function PetugasManage() {
   const [list, setList] = useState([])
   const [form, setForm] = useState(emptyForm)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
 
@@ -32,39 +31,52 @@ export default function PetugasManage() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    setError('')
-    setSuccess('')
     setSubmitting(true)
     try {
       await api.post('/petugas', form)
-      setSuccess('Petugas berhasil ditambahkan')
+      alertSuccess('Petugas ditambahkan', `${form.nama_petugas} berhasil didaftarkan`)
       setForm(emptyForm)
       await fetchList()
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal menambahkan petugas')
+      alertError('Gagal menambahkan petugas', err.response?.data?.message)
     } finally {
       setSubmitting(false)
     }
   }
 
-  async function handleDelete(id) {
-    if (!confirm('Hapus petugas ini?')) return
+  async function handleDelete(id, nama) {
+    const ok = await confirmAction({
+      title: 'Hapus petugas?',
+      text: `Akun "${nama}" akan dihapus permanen dan tidak bisa dikembalikan.`,
+      confirmText: 'Ya, hapus',
+      danger: true,
+    })
+    if (!ok) return
+
     try {
       await api.delete(`/petugas/${id}`)
+      alertSuccess('Petugas dihapus', `${nama} berhasil dihapus`)
       await fetchList()
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal menghapus petugas')
+      alertError('Gagal menghapus petugas', err.response?.data?.message)
     }
   }
 
-  async function handleResetPassword(id) {
-    const newPassword = prompt('Masukkan password baru untuk petugas ini:')
+  async function handleResetPassword(id, nama) {
+    const newPassword = await promptInput({
+      title: `Reset Password: ${nama}`,
+      inputLabel: 'Password baru',
+      inputPlaceholder: 'Minimal 6 karakter',
+      inputType: 'password',
+      confirmText: 'Reset',
+    })
     if (!newPassword) return
+
     try {
       await api.put(`/petugas/${id}/reset-password`, { password: newPassword })
-      setSuccess('Password berhasil direset')
+      alertSuccess('Password direset', `Password ${nama} berhasil diperbarui`)
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal reset password')
+      alertError('Gagal reset password', err.response?.data?.message)
     }
   }
 
@@ -88,8 +100,6 @@ export default function PetugasManage() {
         <div className="card-header">
           <div className="card-title">Tambah Petugas</div>
         </div>
-        {error && <div className="error-text">{error}</div>}
-        {success && <div className="success-text">{success}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -162,11 +172,14 @@ export default function PetugasManage() {
                       <button
                         className="btn btn-small secondary"
                         style={{ marginRight: 6 }}
-                        onClick={() => handleResetPassword(p.id_petugas)}
+                        onClick={() => handleResetPassword(p.id_petugas, p.nama_petugas)}
                       >
                         Reset Password
                       </button>
-                      <button className="btn btn-small danger" onClick={() => handleDelete(p.id_petugas)}>
+                      <button
+                        className="btn btn-small danger"
+                        onClick={() => handleDelete(p.id_petugas, p.nama_petugas)}
+                      >
                         Hapus
                       </button>
                     </td>

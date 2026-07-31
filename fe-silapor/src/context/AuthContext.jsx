@@ -28,8 +28,15 @@ export function AuthProvider({ children }) {
     setRole(null)
   }
 
+  // Dipanggil setelah pengguna mengedit profilnya sendiri, supaya nama yang
+  // tampil di sidebar/topbar langsung ter-update tanpa perlu login ulang.
+  function updateUser(newUser) {
+    localStorage.setItem('silapor_user', JSON.stringify(newUser))
+    setUser(newUser)
+  }
+
   return (
-    <AuthContext.Provider value={{ token, user, role, login, logout }}>
+    <AuthContext.Provider value={{ token, user, role, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   )

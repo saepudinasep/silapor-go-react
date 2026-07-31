@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios.js'
+import { alertSuccess, alertError } from '../utils/swal.js'
 
 export default function RegisterMasyarakat() {
   const [form, setForm] = useState({ nik: '', nama: '', username: '', password: '', telp: '' })
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
@@ -15,15 +14,13 @@ export default function RegisterMasyarakat() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    setError('')
-    setSuccess('')
     setLoading(true)
     try {
       await api.post('/auth/masyarakat/register', form)
-      setSuccess('Registrasi berhasil, silakan login.')
-      setTimeout(() => navigate('/login'), 1200)
+      await alertSuccess('Registrasi berhasil', 'Silakan masuk dengan akun Anda')
+      navigate('/login')
     } catch (err) {
-      setError(err.response?.data?.message || 'Registrasi gagal')
+      alertError('Registrasi gagal', err.response?.data?.message)
     } finally {
       setLoading(false)
     }
@@ -51,9 +48,6 @@ export default function RegisterMasyarakat() {
 
         <h1>Daftar Akun</h1>
         <p className="subtitle">Buat akun untuk mulai melaporkan pengaduan</p>
-
-        {error && <div className="error-text">{error}</div>}
-        {success && <div className="success-text">{success}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">

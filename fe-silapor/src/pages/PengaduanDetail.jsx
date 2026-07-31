@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import api from '../api/axios.js'
 import Layout from '../components/Layout.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
+import { alertSuccess, alertError } from '../utils/swal.js'
 
 const UPLOADS_BASE = import.meta.env.VITE_UPLOADS_BASE_URL || 'http://localhost:8080/uploads'
 
@@ -44,26 +45,26 @@ export default function PengaduanDetail() {
     e.preventDefault()
     if (!balasan.trim()) return
     setSubmitting(true)
-    setError('')
     try {
       await api.post(`/pengaduan/${id}/tanggapan`, { tanggapan: balasan })
       setBalasan('')
       await fetchData()
+      alertSuccess('Tanggapan terkirim', 'Status pengaduan otomatis diperbarui')
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal mengirim tanggapan')
+      alertError('Gagal mengirim tanggapan', err.response?.data?.message)
     } finally {
       setSubmitting(false)
     }
   }
 
   async function handleUpdateStatus(newStatus) {
-    setError('')
     try {
       await api.put(`/pengaduan/${id}/status`, { status: newStatus })
       setStatusValue(newStatus)
       await fetchData()
+      alertSuccess('Status diperbarui', `Status kini: ${newStatus}`)
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal memperbarui status')
+      alertError('Gagal memperbarui status', err.response?.data?.message)
     }
   }
 
@@ -124,7 +125,6 @@ export default function PengaduanDetail() {
         <div className="card-header">
           <div className="card-title">Tanggapan</div>
         </div>
-        {error && <div className="error-text">{error}</div>}
 
         {tanggapanList.length === 0 && (
           <p style={{ fontSize: 13, color: 'var(--muted)' }}>Belum ada tanggapan dari petugas.</p>

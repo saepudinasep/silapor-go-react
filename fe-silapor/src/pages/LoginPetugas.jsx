@@ -2,18 +2,17 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios.js'
 import { useAuth } from '../context/AuthContext.jsx'
+import { alertError } from '../utils/swal.js'
 
 export default function LoginPetugas() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
 
   async function handleSubmit(e) {
     e.preventDefault()
-    setError('')
     setLoading(true)
     try {
       const res = await api.post('/auth/petugas/login', { username, password })
@@ -21,7 +20,7 @@ export default function LoginPetugas() {
       login(token, user, role)
       navigate('/dashboard')
     } catch (err) {
-      setError(err.response?.data?.message || 'Login gagal')
+      alertError('Login gagal', err.response?.data?.message)
     } finally {
       setLoading(false)
     }
@@ -49,8 +48,6 @@ export default function LoginPetugas() {
 
         <h1>Masuk Petugas / Admin</h1>
         <p className="subtitle">Login untuk mengelola dan menanggapi pengaduan</p>
-
-        {error && <div className="error-text">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
