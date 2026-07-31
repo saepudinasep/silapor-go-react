@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import { confirmAction } from '../utils/swal.js'
 
 const ICONS = {
   dashboard: (
@@ -120,7 +121,16 @@ export default function Layout({ title, eyebrow, children }) {
   const navigate = useNavigate()
   const location = useLocation()
 
-  function handleLogout() {
+  async function handleLogout() {
+    const ok = await confirmAction({
+      title: 'Keluar dari akun?',
+      text: 'Anda perlu login kembali untuk mengakses SiLapor.',
+      confirmText: 'Ya, keluar',
+      cancelText: 'Batal',
+      danger: true,
+    })
+    if (!ok) return
+
     logout()
     navigate('/')
   }
