@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/saepudinasep/silapor-go-react/be/config"
-	"github.com/saepudinasep/silapor-go-react/be/routes"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/config"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/routes"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"

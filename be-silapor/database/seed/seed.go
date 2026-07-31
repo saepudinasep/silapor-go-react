@@ -9,9 +9,9 @@ package main
 import (
 	"log"
 
-	"github.com/saepudinasep/silapor-go-react/be/config"
-	"github.com/saepudinasep/silapor-go-react/be/middleware"
-	"github.com/saepudinasep/silapor-go-react/be/models"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/config"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/middleware"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/models"
 )
 
 func main() {

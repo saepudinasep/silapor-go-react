@@ -1,11 +1,11 @@
 package routes
 
 import (
-	"github.com/saepudinasep/silapor-go-react/be/config"
-	"github.com/saepudinasep/silapor-go-react/be/controllers"
-	"github.com/saepudinasep/silapor-go-react/be/middleware"
-	"github.com/saepudinasep/silapor-go-react/be/repositories"
-	"github.com/saepudinasep/silapor-go-react/be/services"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/config"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/controllers"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/middleware"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/repositories"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/services"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"

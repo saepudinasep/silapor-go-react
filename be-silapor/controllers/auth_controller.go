@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/saepudinasep/silapor-go-react/be/services"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/services"
 
 	"github.com/gofiber/fiber/v2"
 )

@@ -3,9 +3,9 @@ package services
 import (
 	"errors"
 
-	"github.com/saepudinasep/silapor-go-react/be/middleware"
-	"github.com/saepudinasep/silapor-go-react/be/models"
-	"github.com/saepudinasep/silapor-go-react/be/repositories"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/middleware"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/models"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/repositories"
 )
 
 // PetugasService defines the business logic contract for managing Petugas

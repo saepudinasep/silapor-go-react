@@ -4,8 +4,8 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/saepudinasep/silapor-go-react/be/middleware"
-	"github.com/saepudinasep/silapor-go-react/be/repositories"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/middleware"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/repositories"
 )
 
 // ProfileService menangani profil akun milik sendiri (self-service),

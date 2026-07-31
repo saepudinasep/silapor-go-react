@@ -21,6 +21,13 @@ type Config struct {
 	DBName    string
 	DBCharset string
 
+	// DBSSLMode: "disable" (default, untuk MySQL lokal), "skip-verify"
+	// (enkripsi TLS aktif tapi tidak verifikasi sertifikat server — cukup
+	// untuk Aiven dan sejenisnya), atau "verify-ca" (verifikasi penuh
+	// pakai file CA certificate, lihat DBSSLCAPath).
+	DBSSLMode   string
+	DBSSLCAPath string
+
 	JWTSecret       string
 	JWTExpiresHours int
 
@@ -61,6 +68,9 @@ func LoadConfig() *Config {
 		DBPass:    getEnv("DB_PASSWORD", ""),
 		DBName:    getEnv("DB_NAME", "silapor"),
 		DBCharset: getEnv("DB_CHARSET", "utf8mb4"),
+
+		DBSSLMode:   getEnv("DB_SSL_MODE", "disable"),
+		DBSSLCAPath: getEnv("DB_SSL_CA_PATH", ""),
 
 		JWTSecret:       getEnv("JWT_SECRET", "secret"),
 		JWTExpiresHours: expiresHours,

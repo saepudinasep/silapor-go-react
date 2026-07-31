@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/saepudinasep/silapor-go-react/be/models"
-	"github.com/saepudinasep/silapor-go-react/be/repositories"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/models"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/repositories"
 )
 
 // TanggapanService defines the business logic contract for Tanggapan.

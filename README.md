@@ -48,6 +48,7 @@ migrate -path database/migrations \
 Ganti `root:PASSWORD_KAMU` sesuai user & password MySQL kamu, dan `silapor` jika nama database berbeda.
 
 Perintah ini akan menjalankan berurutan:
+
 - `000001_create_masyarakat_table.up.sql`
 - `000002_create_petugas_table.up.sql`
 - `000003_create_pengaduan_table.up.sql`
@@ -66,6 +67,78 @@ migrate -path database/migrations \
 migrate -path database/migrations \
   -database "mysql://root:PASSWORD_KAMU@tcp(127.0.0.1:3306)/silapor" version
 ```
+
+---
+
+## 2b. Konfigurasi Database di Aiven MySQL (untuk deploy/production)
+
+Bagian di atas (langkah 2) untuk MySQL **lokal**. Kalau kamu deploy backend ke hosting seperti Render, database-nya disarankan pakai [Aiven](https://aiven.io) (MySQL gratis selamanya, 1GB storage). Berikut langkah lengkapnya.
+
+### Buat service MySQL di Aiven
+
+1. Daftar/masuk di [aiven.io](https://aiven.io) (gratis, tidak perlu kartu kredit).
+2. Klik **Create service** → pilih **MySQL**.
+3. Pilih plan **Free** (biasanya bernama "Hobbyist" atau "Free" tergantung region).
+4. Pilih cloud provider & region terdekat (mis. **Singapore** untuk latensi terbaik dari Indonesia).
+5. Beri nama service, misal `silapor-db`, lalu klik **Create service**.
+6. Tunggu status berubah dari `Rebuilding` menjadi **`Running`** (biasanya 2–5 menit).
+
+### Ambil kredensial koneksi
+
+Di halaman **Overview** service yang baru dibuat, catat informasi berikut (ada di bagian "Connection information"):
+
+| Info Aiven                     | Dipetakan ke `.env`                                    |
+| ------------------------------ | ------------------------------------------------------ |
+| Host                           | `DB_HOST`                                              |
+| Port                           | `DB_PORT`                                              |
+| User (default `avnadmin`)      | `DB_USER`                                              |
+| Password                       | `DB_PASSWORD`                                          |
+| Default database (`defaultdb`) | bisa dipakai, atau buat database baru (lihat di bawah) |
+
+### Buat database `silapor`
+
+Aiven MySQL mendukung banyak database dalam satu service. Buat database khusus untuk project ini:
+
+- Di dashboard Aiven, buka tab **Databases** pada service tersebut → **Create database** → beri nama `silapor`.
+- Atau lewat MySQL client langsung:
+  ```bash
+  mysql --host=HOST --port=PORT --user=avnadmin --password=PASSWORD --ssl-mode=REQUIRED -e "CREATE DATABASE silapor;"
+  ```
+
+### Download CA Certificate (opsional, untuk keamanan penuh)
+
+Aiven **mewajibkan koneksi via TLS/SSL**. Ada dua opsi di project ini (lihat `DB_SSL_MODE` di `.env`):
+
+- **`skip-verify`** (paling gampang) — koneksi tetap terenkripsi, tapi tidak memverifikasi sertifikat server. Cukup untuk kebanyakan kasus.
+- **`verify-ca`** (lebih aman) — download CA certificate dari Aiven:
+  1. Di halaman **Overview** service, cari tombol **CA certificate** → klik **Download**.
+  2. Simpan file itu sebagai `be/certs/aiven-ca.pem`.
+  3. Set `DB_SSL_MODE=verify-ca` dan `DB_SSL_CA_PATH=certs/aiven-ca.pem` di `.env`.
+
+### Update `.env`
+
+```env
+DB_HOST=silapor-db-namaanda.aivencloud.com
+DB_PORT=12345
+DB_USER=avnadmin
+DB_PASSWORD=password-dari-aiven
+DB_NAME=silapor
+DB_CHARSET=utf8mb4
+DB_SSL_MODE=skip-verify
+```
+
+### Jalankan migration ke Aiven
+
+`golang-migrate` juga butuh parameter TLS di connection string-nya:
+
+```bash
+migrate -path database/migrations \
+  -database "mysql://avnadmin:PASSWORD@tcp(HOST:PORT)/silapor?tls=skip-verify" up
+```
+
+Setelah migration sukses, jalankan seeder & start aplikasi seperti biasa (langkah 3) — kode `be-silapor/config/database.go` akan otomatis membangun koneksi TLS ke Aiven sesuai `DB_SSL_MODE` yang kamu set.
+
+> **Catatan keamanan:** jangan pernah commit file `.env` atau `certs/*.pem` ke Git — keduanya sudah masuk `.gitignore` secara default.
 
 ---
 
@@ -94,28 +167,28 @@ Akun admin default (sesuai `.env`): `admin` / `admin12345` (ubah `SEED_ADMIN_USE
 
 ### Endpoint utama
 
-| Method | Endpoint | Role | Keterangan |
-|---|---|---|---|
-| GET | /api/v1/public/beranda | Publik (tanpa login) | Ringkasan & cuplikan pengaduan terbaru untuk landing page |
-| POST | /api/v1/auth/masyarakat/register | Publik | Registrasi masyarakat |
-| POST | /api/v1/auth/masyarakat/login | Publik | Login masyarakat |
-| POST | /api/v1/auth/petugas/login | Publik | Login petugas/admin |
-| POST | /api/v1/pengaduan | Masyarakat | Buat pengaduan (multipart, field `isi_laporan`, `foto`) |
-| GET | /api/v1/pengaduan/saya | Masyarakat | List pengaduan milik sendiri |
-| GET | /api/v1/pengaduan | Petugas/Admin | List semua pengaduan (`?status=&start_date=YYYY-MM-DD&end_date=YYYY-MM-DD`) |
-| GET | /api/v1/pengaduan/summary | Petugas/Admin | Rekap jumlah per status |
-| GET | /api/v1/pengaduan/:id | Semua role terkait | Detail pengaduan |
-| PUT | /api/v1/pengaduan/:id/status | Petugas/Admin | Update status |
-| DELETE | /api/v1/pengaduan/:id | Admin | Hapus pengaduan |
-| GET/POST | /api/v1/pengaduan/:id/tanggapan | Petugas/Admin (post) | Lihat/kirim tanggapan |
-| DELETE | /api/v1/tanggapan/:id | Admin | Hapus tanggapan |
-| POST/GET | /api/v1/petugas | Admin | Kelola petugas |
-| PUT | /api/v1/petugas/:id | Admin | Update petugas |
-| PUT | /api/v1/petugas/:id/reset-password | Admin | Reset password petugas |
-| DELETE | /api/v1/petugas/:id | Admin | Hapus petugas |
-| GET | /api/v1/profile | Semua role | Lihat profil akun sendiri |
-| PUT | /api/v1/profile | Semua role | Update nama/telp akun sendiri |
-| PUT | /api/v1/profile/password | Semua role | Ganti password akun sendiri |
+| Method   | Endpoint                           | Role                 | Keterangan                                                                  |
+| -------- | ---------------------------------- | -------------------- | --------------------------------------------------------------------------- |
+| GET      | /api/v1/public/beranda             | Publik (tanpa login) | Ringkasan & cuplikan pengaduan terbaru untuk landing page                   |
+| POST     | /api/v1/auth/masyarakat/register   | Publik               | Registrasi masyarakat                                                       |
+| POST     | /api/v1/auth/masyarakat/login      | Publik               | Login masyarakat                                                            |
+| POST     | /api/v1/auth/petugas/login         | Publik               | Login petugas/admin                                                         |
+| POST     | /api/v1/pengaduan                  | Masyarakat           | Buat pengaduan (multipart, field `isi_laporan`, `foto`)                     |
+| GET      | /api/v1/pengaduan/saya             | Masyarakat           | List pengaduan milik sendiri                                                |
+| GET      | /api/v1/pengaduan                  | Petugas/Admin        | List semua pengaduan (`?status=&start_date=YYYY-MM-DD&end_date=YYYY-MM-DD`) |
+| GET      | /api/v1/pengaduan/summary          | Petugas/Admin        | Rekap jumlah per status                                                     |
+| GET      | /api/v1/pengaduan/:id              | Semua role terkait   | Detail pengaduan                                                            |
+| PUT      | /api/v1/pengaduan/:id/status       | Petugas/Admin        | Update status                                                               |
+| DELETE   | /api/v1/pengaduan/:id              | Admin                | Hapus pengaduan                                                             |
+| GET/POST | /api/v1/pengaduan/:id/tanggapan    | Petugas/Admin (post) | Lihat/kirim tanggapan                                                       |
+| DELETE   | /api/v1/tanggapan/:id              | Admin                | Hapus tanggapan                                                             |
+| POST/GET | /api/v1/petugas                    | Admin                | Kelola petugas                                                              |
+| PUT      | /api/v1/petugas/:id                | Admin                | Update petugas                                                              |
+| PUT      | /api/v1/petugas/:id/reset-password | Admin                | Reset password petugas                                                      |
+| DELETE   | /api/v1/petugas/:id                | Admin                | Hapus petugas                                                               |
+| GET      | /api/v1/profile                    | Semua role           | Lihat profil akun sendiri                                                   |
+| PUT      | /api/v1/profile                    | Semua role           | Update nama/telp akun sendiri                                               |
+| PUT      | /api/v1/profile/password           | Semua role           | Ganti password akun sendiri                                                 |
 
 Dokumentasi lengkap (OpenAPI): `be/docs/swagger.yaml` — import ke [Swagger Editor](https://editor.swagger.io/) untuk tampilan interaktif.
 
@@ -151,7 +224,7 @@ Build untuk production:
 npm run build
 ```
 
-Hasil build ada di `fe/dist/`, siap di-deploy ke Vercel/Netlify/static hosting apa pun.
+Hasil build ada di `fe-silapor/dist/`, siap di-deploy ke Vercel/Netlify/static hosting apa pun.
 
 ---
 
@@ -180,6 +253,9 @@ Setiap layer punya tanggung jawab terpisah agar mudah di-maintain dan dikembangk
 - **CORS error di frontend** → pastikan backend jalan dan `VITE_API_BASE_URL` sesuai.
 - **Upload foto gagal** → pastikan folder `be/uploads/` ada (dibuat otomatis saat `main.go` start) dan `MAX_UPLOAD_MB` di `.env` cukup besar.
 - **Token invalid terus** → pastikan header `Authorization: Bearer <token>` terkirim (otomatis lewat axios interceptor di frontend).
+- **`x509: certificate signed by unknown authority`** → biasanya karena `DB_SSL_MODE=verify-ca` tapi file CA certificate salah/tidak ada. Cek ulang `DB_SSL_CA_PATH`, atau ganti sementara ke `DB_SSL_MODE=skip-verify`.
+- **`this server does not support TLS-required` / koneksi ke Aiven ditolak** → pastikan `DB_SSL_MODE` di `.env` **bukan** `disable`. Aiven mewajibkan koneksi TLS.
+- **Migration ke Aiven gagal dengan error TLS** → pastikan menambahkan `?tls=skip-verify` (atau sesuai) di connection string `migrate`, lihat langkah 2b.
 
 ---
 

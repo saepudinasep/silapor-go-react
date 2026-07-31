@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"github.com/saepudinasep/silapor-go-react/be/models"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/models"
 
 	"gorm.io/gorm"
 )

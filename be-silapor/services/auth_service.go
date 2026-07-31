@@ -4,9 +4,9 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/saepudinasep/silapor-go-react/be/middleware"
-	"github.com/saepudinasep/silapor-go-react/be/models"
-	"github.com/saepudinasep/silapor-go-react/be/repositories"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/middleware"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/models"
+	"github.com/saepudinasep/silapor-go-react/be-silapor/repositories"
 )
 
 // AuthService defines business logic for authentication of both
