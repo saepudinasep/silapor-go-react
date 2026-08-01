@@ -11,83 +11,94 @@ import PetugasManage from './pages/PetugasManage.jsx'
 import GenerateLaporan from './pages/GenerateLaporan.jsx'
 import Settings from './pages/Settings.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
+import TopLoadingBar from './components/TopLoadingBar.jsx'
+import LoadingOverlay from './components/LoadingOverlay.jsx'
+import RouteChangeIndicator from './components/RouteChangeIndicator.jsx'
 
 export default function App() {
   return (
-    <Routes>
-      {/* Public */}
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<LoginMasyarakat />} />
-      <Route path="/register" element={<RegisterMasyarakat />} />
-      <Route path="/petugas/login" element={<LoginPetugas />} />
+    <>
+      {/* Indikator loading global: bar tipis di atas (navigasi halaman +
+          semua request) dan overlay di tengah (khusus insert/edit/delete) */}
+      <TopLoadingBar />
+      <LoadingOverlay />
+      <RouteChangeIndicator />
 
-      {/* Masyarakat */}
-      <Route
-        path="/pengaduan/baru"
-        element={
-          <ProtectedRoute allowedRoles={['masyarakat']}>
-            <PengaduanForm />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/pengaduan/saya"
-        element={
-          <ProtectedRoute allowedRoles={['masyarakat']}>
-            <PengaduanSaya />
-          </ProtectedRoute>
-        }
-      />
+      <Routes>
+        {/* Public */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<LoginMasyarakat />} />
+        <Route path="/register" element={<RegisterMasyarakat />} />
+        <Route path="/petugas/login" element={<LoginPetugas />} />
 
-      {/* Detail bisa diakses masyarakat (miliknya) & petugas/admin */}
-      <Route
-        path="/pengaduan/:id"
-        element={
-          <ProtectedRoute allowedRoles={['masyarakat', 'petugas', 'admin']}>
-            <PengaduanDetail />
-          </ProtectedRoute>
-        }
-      />
+        {/* Masyarakat */}
+        <Route
+          path="/pengaduan/baru"
+          element={
+            <ProtectedRoute allowedRoles={['masyarakat']}>
+              <PengaduanForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pengaduan/saya"
+          element={
+            <ProtectedRoute allowedRoles={['masyarakat']}>
+              <PengaduanSaya />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Petugas & Admin */}
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute allowedRoles={['petugas', 'admin']}>
-            <DashboardPetugas />
-          </ProtectedRoute>
-        }
-      />
+        {/* Detail bisa diakses masyarakat (miliknya) & petugas/admin */}
+        <Route
+          path="/pengaduan/:id"
+          element={
+            <ProtectedRoute allowedRoles={['masyarakat', 'petugas', 'admin']}>
+              <PengaduanDetail />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Admin only */}
-      <Route
-        path="/admin/petugas"
-        element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <PetugasManage />
-          </ProtectedRoute>
-        }
-      />
+        {/* Petugas & Admin */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['petugas', 'admin']}>
+              <DashboardPetugas />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Generate Laporan - petugas & admin */}
-      <Route
-        path="/laporan"
-        element={
-          <ProtectedRoute allowedRoles={['petugas', 'admin']}>
-            <GenerateLaporan />
-          </ProtectedRoute>
-        }
-      />
+        {/* Admin only */}
+        <Route
+          path="/admin/petugas"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <PetugasManage />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Pengaturan akun - semua role yang sudah login */}
-      <Route
-        path="/pengaturan"
-        element={
-          <ProtectedRoute allowedRoles={['masyarakat', 'petugas', 'admin']}>
-            <Settings />
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+        {/* Generate Laporan - petugas & admin */}
+        <Route
+          path="/laporan"
+          element={
+            <ProtectedRoute allowedRoles={['petugas', 'admin']}>
+              <GenerateLaporan />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Pengaturan akun - semua role yang sudah login */}
+        <Route
+          path="/pengaturan"
+          element={
+            <ProtectedRoute allowedRoles={['masyarakat', 'petugas', 'admin']}>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </>
   )
 }

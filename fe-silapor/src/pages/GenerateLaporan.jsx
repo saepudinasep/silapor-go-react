@@ -105,7 +105,7 @@ export default function GenerateLaporan() {
           <div className="card-title">Filter Laporan</div>
         </div>
 
-        <form onSubmit={handleGenerate} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+        <form onSubmit={handleGenerate} className="filter-grid">
           <div className="form-group">
             <label>Dari Tanggal</label>
             <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />

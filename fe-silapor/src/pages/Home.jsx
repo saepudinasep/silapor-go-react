@@ -60,7 +60,7 @@ export default function Home() {
         <div className="public-navbar-spacer"></div>
         <div className="public-navbar-actions">
           <Link to="/login" className="btn secondary">
-            <span className="full-label">Masuk</span>
+            Masuk
           </Link>
           <Link to="/register" className="btn">
             Buat Laporan

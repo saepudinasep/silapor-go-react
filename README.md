@@ -41,8 +41,7 @@ Dari folder `be-silapor/`:
 
 ```bash
 cd be-silapor
-migrate -path database/migrations \
-  -database "mysql://root:PASSWORD_KAMU@tcp(127.0.0.1:3306)/silapor" up
+migrate -path database/migrations -database "mysql://root:PASSWORD_KAMU@tcp(127.0.0.1:3306)/silapor" up
 ```
 
 Ganti `root:PASSWORD_KAMU` sesuai user & password MySQL kamu, dan `silapor` jika nama database berbeda.
@@ -132,8 +131,7 @@ DB_SSL_MODE=skip-verify
 `golang-migrate` juga butuh parameter TLS di connection string-nya:
 
 ```bash
-migrate -path database/migrations \
-  -database "mysql://avnadmin:PASSWORD@tcp(HOST:PORT)/silapor?tls=skip-verify" up
+migrate -path database/migrations -database "mysql://avnadmin:PASSWORD@tcp(HOST:PORT)/silapor?tls=skip-verify" up
 ```
 
 Setelah migration sukses, jalankan seeder & start aplikasi seperti biasa (langkah 3) — kode `be-silapor/config/database.go` akan otomatis membangun koneksi TLS ke Aiven sesuai `DB_SSL_MODE` yang kamu set.

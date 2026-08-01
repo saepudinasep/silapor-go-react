@@ -1,4 +1,5 @@
 import axios from "axios";
+import { beginRequest, endRequest } from "../utils/loadingStore.js";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api/v1",
@@ -9,12 +10,20 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  // Tandai request mulai berjalan → progress bar tampil, dan kalau method-nya
+  // POST/PUT/PATCH/DELETE, overlay loading juga ikut tampil (lihat loadingStore.js).
+  beginRequest(config.method);
   return config;
 });
 
 api.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    endRequest(res.config?.method);
+    return res;
+  },
   (err) => {
+    endRequest(err.config?.method);
+
     const url = err.config?.url || "";
     const isAuthEndpoint = url.includes("/auth/");
 

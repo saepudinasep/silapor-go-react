@@ -44,7 +44,7 @@ export default function PengaduanSaya() {
       {list.map((p) => (
         <Link key={p.id_pengaduan} to={`/pengaduan/${p.id_pengaduan}`} style={{ display: 'block' }}>
           <div className="card" style={{ cursor: 'pointer' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
               <span className={`badge ${p.status}`}>
                 <span className="badge-dot"></span>
                 {p.status}

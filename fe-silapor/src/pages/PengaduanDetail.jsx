@@ -87,7 +87,7 @@ export default function PengaduanDetail() {
   return (
     <Layout title="Detail Pengaduan" eyebrow={isPetugasOrAdmin ? 'Petugas' : 'Masyarakat'}>
       <div className="card" style={{ maxWidth: 640 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
           <span className={`badge ${pengaduan.status}`}>
             <span className="badge-dot"></span>
             {pengaduan.status}

@@ -85,7 +85,7 @@ export default function PetugasManage() {
 
   return (
     <Layout title="Manajemen Pengguna" eyebrow="Administrator">
-      <div className="stats-row" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+      <div className="stats-row cols-2">
         <div className="stat-card rose">
           <div className="stat-val">{totalAdmin}</div>
           <div className="stat-label">Administrator</div>

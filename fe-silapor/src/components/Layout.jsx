@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { confirmAction } from '../utils/swal.js'
@@ -62,6 +63,16 @@ const ICONS = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   ),
+  menu: (
+    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+    </svg>
+  ),
+  close: (
+    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  ),
 }
 
 function navItemsForRole(role) {
@@ -120,6 +131,12 @@ export default function Layout({ title, eyebrow, children }) {
   const { user, role, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  // Tutup sidebar mobile otomatis setiap kali pindah halaman
+  useEffect(() => {
+    setSidebarOpen(false)
+  }, [location.pathname])
 
   async function handleLogout() {
     const ok = await confirmAction({
@@ -144,7 +161,9 @@ export default function Layout({ title, eyebrow, children }) {
     <div className="app-shell">
       <div className="hero-bg"></div>
 
-      <aside className="sidebar">
+      {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)}></div>}
+
+      <aside className={`sidebar${sidebarOpen ? ' mobile-open' : ''}`}>
         <div className="sidebar-logo">
           <div className="logo-mark">
             <div className="logo-icon">
@@ -171,6 +190,7 @@ export default function Layout({ title, eyebrow, children }) {
                 key={item.to}
                 to={item.to}
                 className={`nav-item${location.pathname === item.to ? ' active' : ''}`}
+                onClick={() => setSidebarOpen(false)}
               >
                 {ICONS[item.icon]}
                 {item.label}
@@ -191,10 +211,17 @@ export default function Layout({ title, eyebrow, children }) {
 
       <main className="main">
         <div className="topbar">
+          <button
+            className="sidebar-toggle"
+            onClick={() => setSidebarOpen((v) => !v)}
+            aria-label={sidebarOpen ? 'Tutup menu' : 'Buka menu'}
+          >
+            {sidebarOpen ? ICONS.close : ICONS.menu}
+          </button>
           <span className="topbar-title">{title}</span>
           <div className="topbar-spacer"></div>
           <button className="topbar-btn" onClick={handleLogout}>
-            {ICONS.logout} Keluar
+            {ICONS.logout} <span className="topbar-btn-label">Keluar</span>
           </button>
         </div>
 
