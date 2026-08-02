@@ -3,13 +3,23 @@ import Home from './pages/Home.jsx'
 import LoginMasyarakat from './pages/LoginMasyarakat.jsx'
 import LoginPetugas from './pages/LoginPetugas.jsx'
 import RegisterMasyarakat from './pages/RegisterMasyarakat.jsx'
-import PengaduanForm from './pages/PengaduanForm.jsx'
-import PengaduanSaya from './pages/PengaduanSaya.jsx'
-import PengaduanDetail from './pages/PengaduanDetail.jsx'
-import DashboardPetugas from './pages/DashboardPetugas.jsx'
-import PetugasManage from './pages/PetugasManage.jsx'
 import GenerateLaporan from './pages/GenerateLaporan.jsx'
 import Settings from './pages/Settings.jsx'
+
+// Masyarakat — pengaduan
+import PengaduanPageMasyarakat from './pages/masyarakat/pengaduan/Page.jsx'
+import PengaduanCreateMasyarakat from './pages/masyarakat/pengaduan/Create.jsx'
+import PengaduanDetailMasyarakat from './pages/masyarakat/pengaduan/Detail.jsx'
+
+// Petugas & Admin — pengaduan
+import PengaduanPagePetugas from './pages/petugas/pengaduan/Page.jsx'
+import PengaduanUpdatePetugas from './pages/petugas/pengaduan/Update.jsx'
+
+// Admin — manajemen petugas
+import PetugasPageAdmin from './pages/admin/petugas/Page.jsx'
+import PetugasCreateAdmin from './pages/admin/petugas/Create.jsx'
+import PetugasUpdateAdmin from './pages/admin/petugas/Update.jsx'
+
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import TopLoadingBar from './components/TopLoadingBar.jsx'
 import LoadingOverlay from './components/LoadingOverlay.jsx'
@@ -31,50 +41,72 @@ export default function App() {
         <Route path="/register" element={<RegisterMasyarakat />} />
         <Route path="/petugas/login" element={<LoginPetugas />} />
 
-        {/* Masyarakat */}
+        {/* Masyarakat — CRUD Pengaduan */}
         <Route
-          path="/pengaduan/baru"
+          path="/masyarakat/pengaduan"
           element={
             <ProtectedRoute allowedRoles={['masyarakat']}>
-              <PengaduanForm />
+              <PengaduanPageMasyarakat />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/pengaduan/saya"
+          path="/masyarakat/pengaduan/baru"
           element={
             <ProtectedRoute allowedRoles={['masyarakat']}>
-              <PengaduanSaya />
+              <PengaduanCreateMasyarakat />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/masyarakat/pengaduan/:id"
+          element={
+            <ProtectedRoute allowedRoles={['masyarakat']}>
+              <PengaduanDetailMasyarakat />
             </ProtectedRoute>
           }
         />
 
-        {/* Detail bisa diakses masyarakat (miliknya) & petugas/admin */}
+        {/* Petugas & Admin — CRUD Pengaduan (list + detail/update status/tanggapan) */}
         <Route
-          path="/pengaduan/:id"
-          element={
-            <ProtectedRoute allowedRoles={['masyarakat', 'petugas', 'admin']}>
-              <PengaduanDetail />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Petugas & Admin */}
-        <Route
-          path="/dashboard"
+          path="/petugas/pengaduan"
           element={
             <ProtectedRoute allowedRoles={['petugas', 'admin']}>
-              <DashboardPetugas />
+              <PengaduanPagePetugas />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/petugas/pengaduan/:id"
+          element={
+            <ProtectedRoute allowedRoles={['petugas', 'admin']}>
+              <PengaduanUpdatePetugas />
             </ProtectedRoute>
           }
         />
 
-        {/* Admin only */}
+        {/* Admin — CRUD Manajemen Petugas */}
         <Route
           path="/admin/petugas"
           element={
             <ProtectedRoute allowedRoles={['admin']}>
-              <PetugasManage />
+              <PetugasPageAdmin />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/petugas/baru"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <PetugasCreateAdmin />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/petugas/:id/edit"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <PetugasUpdateAdmin />
             </ProtectedRoute>
           }
         />

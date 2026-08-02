@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import api from '../api/axios.js'
-import Layout from '../components/Layout.jsx'
-import { useAuth } from '../context/AuthContext.jsx'
-import { alertSuccess, alertError } from '../utils/swal.js'
+import api from '../../../api/axios.js'
+import Layout from '../../../components/Layout.jsx'
+import { alertSuccess, alertError } from '../../../utils/swal.js'
 
 const UPLOADS_BASE = import.meta.env.VITE_UPLOADS_BASE_URL || 'http://localhost:8080/uploads'
 
-export default function PengaduanDetail() {
+export default function PengaduanUpdate() {
   const { id } = useParams()
-  const { role } = useAuth()
   const [pengaduan, setPengaduan] = useState(null)
   const [tanggapanList, setTanggapanList] = useState([])
   const [loading, setLoading] = useState(true)
@@ -17,8 +15,6 @@ export default function PengaduanDetail() {
   const [statusValue, setStatusValue] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
-
-  const isPetugasOrAdmin = role === 'petugas' || role === 'admin'
 
   useEffect(() => {
     fetchData()
@@ -70,7 +66,7 @@ export default function PengaduanDetail() {
 
   if (loading) {
     return (
-      <Layout title="Detail Pengaduan">
+      <Layout title="Detail Pengaduan" eyebrow="Petugas">
         <p style={{ color: 'var(--muted)' }}>Memuat...</p>
       </Layout>
     )
@@ -78,14 +74,14 @@ export default function PengaduanDetail() {
 
   if (!pengaduan) {
     return (
-      <Layout title="Detail Pengaduan">
+      <Layout title="Detail Pengaduan" eyebrow="Petugas">
         <div className="error-text">{error || 'Pengaduan tidak ditemukan'}</div>
       </Layout>
     )
   }
 
   return (
-    <Layout title="Detail Pengaduan" eyebrow={isPetugasOrAdmin ? 'Petugas' : 'Masyarakat'}>
+    <Layout title="Detail Pengaduan" eyebrow="Petugas">
       <div className="card" style={{ maxWidth: 640 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
           <span className={`badge ${pengaduan.status}`}>
@@ -109,16 +105,14 @@ export default function PengaduanDetail() {
           </p>
         )}
 
-        {isPetugasOrAdmin && (
-          <div className="form-group" style={{ marginTop: 18, maxWidth: 220 }}>
-            <label>Ubah Status</label>
-            <select className="form-select" value={statusValue} onChange={(e) => handleUpdateStatus(e.target.value)}>
-              <option value="baru">baru</option>
-              <option value="proses">proses</option>
-              <option value="selesai">selesai</option>
-            </select>
-          </div>
-        )}
+        <div className="form-group" style={{ marginTop: 18, maxWidth: 220 }}>
+          <label>Ubah Status</label>
+          <select className="form-select" value={statusValue} onChange={(e) => handleUpdateStatus(e.target.value)}>
+            <option value="baru">baru</option>
+            <option value="proses">proses</option>
+            <option value="selesai">selesai</option>
+          </select>
+        </div>
       </div>
 
       <div className="card" style={{ maxWidth: 640 }}>
@@ -139,17 +133,15 @@ export default function PengaduanDetail() {
           </div>
         ))}
 
-        {isPetugasOrAdmin && (
-          <form onSubmit={handleKirimTanggapan} style={{ marginTop: 18 }}>
-            <div className="form-group">
-              <label>Tulis Tanggapan</label>
-              <textarea rows={3} value={balasan} onChange={(e) => setBalasan(e.target.value)} required />
-            </div>
-            <button className="btn" disabled={submitting}>
-              {submitting ? 'Mengirim...' : 'Kirim Tanggapan'}
-            </button>
-          </form>
-        )}
+        <form onSubmit={handleKirimTanggapan} style={{ marginTop: 18 }}>
+          <div className="form-group">
+            <label>Tulis Tanggapan</label>
+            <textarea rows={3} value={balasan} onChange={(e) => setBalasan(e.target.value)} required />
+          </div>
+          <button className="btn" disabled={submitting}>
+            {submitting ? 'Mengirim...' : 'Kirim Tanggapan'}
+          </button>
+        </form>
       </div>
     </Layout>
   )

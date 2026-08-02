@@ -18,7 +18,7 @@ export default function LoginMasyarakat() {
       const res = await api.post('/auth/masyarakat/login', { username, password })
       const { token, user, role } = res.data.data
       login(token, user, role)
-      navigate('/pengaduan/saya')
+      navigate('/masyarakat/pengaduan')
     } catch (err) {
       alertError('Login gagal', err.response?.data?.message)
     } finally {

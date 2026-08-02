@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../api/axios.js'
-import Layout from '../components/Layout.jsx'
-import { alertSuccess, alertError } from '../utils/swal.js'
+import api from '../../../api/axios.js'
+import Layout from '../../../components/Layout.jsx'
+import { alertSuccess, alertError } from '../../../utils/swal.js'
 
-export default function PengaduanForm() {
+export default function PengaduanCreate() {
   const [isiLaporan, setIsiLaporan] = useState('')
   const [foto, setFoto] = useState(null)
   const [fotoName, setFotoName] = useState('')
@@ -29,7 +29,7 @@ export default function PengaduanForm() {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       await alertSuccess('Pengaduan terkirim', 'Laporan Anda akan segera ditinjau petugas')
-      navigate('/pengaduan/saya')
+      navigate('/masyarakat/pengaduan')
     } catch (err) {
       alertError('Gagal mengirim pengaduan', err.response?.data?.message)
     } finally {

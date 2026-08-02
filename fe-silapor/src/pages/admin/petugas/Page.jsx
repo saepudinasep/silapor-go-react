@@ -1,15 +1,12 @@
 import { useEffect, useState } from 'react'
-import api from '../api/axios.js'
-import Layout from '../components/Layout.jsx'
-import { alertSuccess, alertError, confirmAction, promptInput } from '../utils/swal.js'
+import { Link } from 'react-router-dom'
+import api from '../../../api/axios.js'
+import Layout from '../../../components/Layout.jsx'
+import { alertSuccess, alertError, confirmAction, promptInput } from '../../../utils/swal.js'
 
-const emptyForm = { nama_petugas: '', username: '', password: '', telp: '', level: 'petugas' }
-
-export default function PetugasManage() {
+export default function PetugasPage() {
   const [list, setList] = useState([])
-  const [form, setForm] = useState(emptyForm)
   const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     fetchList()
@@ -22,25 +19,6 @@ export default function PetugasManage() {
       setList(res.data.data || [])
     } finally {
       setLoading(false)
-    }
-  }
-
-  function update(field, value) {
-    setForm((f) => ({ ...f, [field]: value }))
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault()
-    setSubmitting(true)
-    try {
-      await api.post('/petugas', form)
-      alertSuccess('Petugas ditambahkan', `${form.nama_petugas} berhasil didaftarkan`)
-      setForm(emptyForm)
-      await fetchList()
-    } catch (err) {
-      alertError('Gagal menambahkan petugas', err.response?.data?.message)
-    } finally {
-      setSubmitting(false)
     }
   }
 
@@ -96,49 +74,15 @@ export default function PetugasManage() {
         </div>
       </div>
 
-      <div className="card">
-        <div className="card-header">
-          <div className="card-title">Tambah Petugas</div>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Nama Petugas</label>
-            <input value={form.nama_petugas} onChange={(e) => update('nama_petugas', e.target.value)} required />
-          </div>
-          <div className="form-group">
-            <label>Username</label>
-            <input value={form.username} onChange={(e) => update('username', e.target.value)} required />
-          </div>
-          <div className="form-group">
-            <label>Password</label>
-            <input
-              type="password"
-              value={form.password}
-              onChange={(e) => update('password', e.target.value)}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>No. Telepon</label>
-            <input value={form.telp} onChange={(e) => update('telp', e.target.value)} />
-          </div>
-          <div className="form-group">
-            <label>Level</label>
-            <select className="form-select" value={form.level} onChange={(e) => update('level', e.target.value)}>
-              <option value="petugas">petugas</option>
-              <option value="admin">admin</option>
-            </select>
-          </div>
-          <button className="btn" disabled={submitting} style={{ width: 'auto' }}>
-            {submitting ? 'Menyimpan...' : 'Tambah Petugas'}
-          </button>
-        </form>
-      </div>
-
       <div className="card table-card">
-        <div className="card-header">
+        <div
+          className="card-header"
+          style={{ padding: '18px 22px', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}
+        >
           <div className="card-title">Daftar Pengguna</div>
+          <Link to="/admin/petugas/baru" className="btn" style={{ width: 'auto' }}>
+            + Tambah Petugas
+          </Link>
         </div>
         <div className="table-wrap">
           <table>
@@ -159,6 +103,13 @@ export default function PetugasManage() {
                   </td>
                 </tr>
               )}
+              {!loading && list.length === 0 && (
+                <tr>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: 24, color: 'var(--muted)' }}>
+                    Belum ada pengguna
+                  </td>
+                </tr>
+              )}
               {!loading &&
                 list.map((p) => (
                   <tr key={p.id_petugas}>
@@ -169,6 +120,13 @@ export default function PetugasManage() {
                       <span className={`role-pill ${p.level}`}>{p.level}</span>
                     </td>
                     <td style={{ whiteSpace: 'nowrap' }}>
+                      <Link
+                        to={`/admin/petugas/${p.id_petugas}/edit`}
+                        className="btn btn-small secondary"
+                        style={{ marginRight: 6 }}
+                      >
+                        Edit
+                      </Link>
                       <button
                         className="btn btn-small secondary"
                         style={{ marginRight: 6 }}

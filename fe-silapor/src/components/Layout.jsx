@@ -80,8 +80,8 @@ function navItemsForRole(role) {
     return [
       {
         label: 'Utama', items: [
-          { to: '/pengaduan/saya', icon: 'dashboard', label: 'Pengaduan Saya' },
-          { to: '/pengaduan/baru', icon: 'plus', label: 'Buat Pengaduan' },
+          { to: '/masyarakat/pengaduan', icon: 'dashboard', label: 'Pengaduan Saya' },
+          { to: '/masyarakat/pengaduan/baru', icon: 'plus', label: 'Buat Pengaduan' },
         ]
       },
       {
@@ -95,11 +95,7 @@ function navItemsForRole(role) {
     return [
       {
         label: 'Utama', items: [
-          { to: '/dashboard', icon: 'dashboard', label: 'Dashboard' },
-        ]
-      },
-      {
-        label: 'Manajemen', items: [
+          { to: '/petugas/pengaduan', icon: 'dashboard', label: 'Dashboard' },
           { to: '/admin/petugas', icon: 'users', label: 'Data Pengguna' },
           { to: '/laporan', icon: 'report', label: 'Generate Laporan' },
         ]
@@ -115,7 +111,7 @@ function navItemsForRole(role) {
   return [
     {
       label: 'Utama', items: [
-        { to: '/dashboard', icon: 'dashboard', label: 'Dashboard' },
+        { to: '/petugas/pengaduan', icon: 'dashboard', label: 'Dashboard' },
         { to: '/laporan', icon: 'report', label: 'Generate Laporan' },
       ]
     },

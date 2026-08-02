@@ -18,7 +18,7 @@ export default function LoginPetugas() {
       const res = await api.post('/auth/petugas/login', { username, password })
       const { token, user, role } = res.data.data
       login(token, user, role)
-      navigate('/dashboard')
+      navigate('/petugas/pengaduan')
     } catch (err) {
       alertError('Login gagal', err.response?.data?.message)
     } finally {

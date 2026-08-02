@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import api from '../api/axios.js'
-import Layout from '../components/Layout.jsx'
+import api from '../../../api/axios.js'
+import Layout from '../../../components/Layout.jsx'
 
 const STATUS_TABS = [
   { key: '', label: 'Semua' },
@@ -10,7 +10,7 @@ const STATUS_TABS = [
   { key: 'selesai', label: 'Selesai' },
 ]
 
-export default function DashboardPetugas() {
+export default function PengaduanPage() {
   const [summary, setSummary] = useState({ baru: 0, proses: 0, selesai: 0 })
   const [list, setList] = useState([])
   const [activeStatus, setActiveStatus] = useState('')
@@ -116,7 +116,7 @@ export default function DashboardPetugas() {
                     </span>
                   </td>
                   <td>
-                    <Link to={`/pengaduan/${p.id_pengaduan}`} className="btn btn-small secondary">
+                    <Link to={`/petugas/pengaduan/${p.id_pengaduan}`} className="btn btn-small secondary">
                       Detail
                     </Link>
                   </td>

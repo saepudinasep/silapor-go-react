@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import api from '../api/axios.js'
-import Layout from '../components/Layout.jsx'
+import api from '../../../api/axios.js'
+import Layout from '../../../components/Layout.jsx'
 
-export default function PengaduanSaya() {
+export default function PengaduanPage() {
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -42,7 +42,7 @@ export default function PengaduanSaya() {
       )}
 
       {list.map((p) => (
-        <Link key={p.id_pengaduan} to={`/pengaduan/${p.id_pengaduan}`} style={{ display: 'block' }}>
+        <Link key={p.id_pengaduan} to={`/masyarakat/pengaduan/${p.id_pengaduan}`} style={{ display: 'block' }}>
           <div className="card" style={{ cursor: 'pointer' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
               <span className={`badge ${p.status}`}>
@@ -60,7 +60,7 @@ export default function PengaduanSaya() {
         </Link>
       ))}
 
-      <Link to="/pengaduan/baru" className="fab">
+      <Link to="/masyarakat/pengaduan/baru" className="fab">
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
