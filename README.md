@@ -10,6 +10,16 @@ silapor-go-react/
 └── fe-silapor/     ← Frontend (React + Vite)
 ```
 
+## Daftar Isi
+
+1. [Prasyarat](#1-prasyarat)
+2. [Setup Database](#2-setup-database)
+3. [Menjalankan Backend](#3-menjalankan-backend-be-silapor)
+4. [Menjalankan Frontend](#4-menjalankan-frontend-fe-silapor)
+5. [Alur Aplikasi Singkat](#5-alur-aplikasi-singkat)
+6. [Struktur Backend (Clean Architecture)](#6-struktur-backend-clean-architecture)
+7. [Troubleshooting](#7-troubleshooting)
+
 ---
 
 ## 1. Prasyarat
@@ -69,77 +79,6 @@ migrate -path database/migrations \
 
 ---
 
-## 2b. Konfigurasi Database di Aiven MySQL (untuk deploy/production)
-
-Bagian di atas (langkah 2) untuk MySQL **lokal**. Kalau kamu deploy backend ke hosting seperti Render, database-nya disarankan pakai [Aiven](https://aiven.io) (MySQL gratis selamanya, 1GB storage). Berikut langkah lengkapnya.
-
-### Buat service MySQL di Aiven
-
-1. Daftar/masuk di [aiven.io](https://aiven.io) (gratis, tidak perlu kartu kredit).
-2. Klik **Create service** → pilih **MySQL**.
-3. Pilih plan **Free** (biasanya bernama "Hobbyist" atau "Free" tergantung region).
-4. Pilih cloud provider & region terdekat (mis. **Singapore** untuk latensi terbaik dari Indonesia).
-5. Beri nama service, misal `silapor-db`, lalu klik **Create service**.
-6. Tunggu status berubah dari `Rebuilding` menjadi **`Running`** (biasanya 2–5 menit).
-
-### Ambil kredensial koneksi
-
-Di halaman **Overview** service yang baru dibuat, catat informasi berikut (ada di bagian "Connection information"):
-
-| Info Aiven                     | Dipetakan ke `.env`                                    |
-| ------------------------------ | ------------------------------------------------------ |
-| Host                           | `DB_HOST`                                              |
-| Port                           | `DB_PORT`                                              |
-| User (default `avnadmin`)      | `DB_USER`                                              |
-| Password                       | `DB_PASSWORD`                                          |
-| Default database (`defaultdb`) | bisa dipakai, atau buat database baru (lihat di bawah) |
-
-### Buat database `silapor`
-
-Aiven MySQL mendukung banyak database dalam satu service. Buat database khusus untuk project ini:
-
-- Di dashboard Aiven, buka tab **Databases** pada service tersebut → **Create database** → beri nama `silapor`.
-- Atau lewat MySQL client langsung:
-  ```bash
-  mysql --host=HOST --port=PORT --user=avnadmin --password=PASSWORD --ssl-mode=REQUIRED -e "CREATE DATABASE silapor;"
-  ```
-
-### Download CA Certificate (opsional, untuk keamanan penuh)
-
-Aiven **mewajibkan koneksi via TLS/SSL**. Ada dua opsi di project ini (lihat `DB_SSL_MODE` di `.env`):
-
-- **`skip-verify`** (paling gampang) — koneksi tetap terenkripsi, tapi tidak memverifikasi sertifikat server. Cukup untuk kebanyakan kasus.
-- **`verify-ca`** (lebih aman) — download CA certificate dari Aiven:
-  1. Di halaman **Overview** service, cari tombol **CA certificate** → klik **Download**.
-  2. Simpan file itu sebagai `be/certs/aiven-ca.pem`.
-  3. Set `DB_SSL_MODE=verify-ca` dan `DB_SSL_CA_PATH=certs/aiven-ca.pem` di `.env`.
-
-### Update `.env`
-
-```env
-DB_HOST=silapor-db-namaanda.aivencloud.com
-DB_PORT=12345
-DB_USER=avnadmin
-DB_PASSWORD=password-dari-aiven
-DB_NAME=silapor
-DB_CHARSET=utf8mb4
-DB_SSL_MODE=skip-verify
-```
-
-### Jalankan migration ke Aiven
-
-`golang-migrate` juga butuh parameter TLS di connection string-nya:
-
-```bash
-migrate -path database/migrations -database "mysql://avnadmin:PASSWORD@tcp(HOST:PORT)/silapor?tls=skip-verify" up
-```
-
-Setelah migration sukses, jalankan seeder & start aplikasi seperti biasa (langkah 3) — kode `be-silapor/config/database.go` akan otomatis membangun koneksi TLS ke Aiven sesuai `DB_SSL_MODE` yang kamu set.
-
-> **Catatan keamanan:** jangan pernah commit file `.env` atau `certs/*.pem` ke Git — keduanya sudah masuk `.gitignore` secara default.
-
----
-
 ## 3. Menjalankan Backend (`be-silapor/`)
 
 ```bash
@@ -147,7 +86,47 @@ cd be-silapor
 cp .env.example .env
 ```
 
-Edit `.env` sesuai kredensial MySQL Anda. **Pastikan migration (langkah 2) sudah dijalankan lebih dulu**, baru lanjutkan:
+Edit `.env` sesuai kredensial MySQL Anda, contoh:
+
+```env
+# =========================
+# APP CONFIG
+# =========================
+APP_NAME=silapor-api
+APP_PORT=8081
+APP_ENV=local
+
+# =========================
+# DATABASE CONFIG (MySQL)
+# =========================
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=silapor
+DB_CHARSET=utf8mb4
+DB_SSL_MODE=disable
+
+# =========================
+# JWT CONFIG
+# =========================
+JWT_SECRET=change-this-to-a-very-long-random-secret
+JWT_EXPIRES_HOURS=24
+
+# =========================
+# UPLOAD
+# =========================
+UPLOAD_DIR=uploads
+MAX_UPLOAD_MB=5
+
+# =========================
+# SEEDER
+# =========================
+SEED_ADMIN_USERNAME=admin
+SEED_ADMIN_PASSWORD=admin12345
+```
+
+**Pastikan migration (langkah 2) sudah dijalankan lebih dulu**, baru lanjutkan:
 
 ```bash
 go mod tidy
@@ -188,7 +167,7 @@ Akun admin default (sesuai `.env`): `admin` / `admin12345` (ubah `SEED_ADMIN_USE
 | PUT      | /api/v1/profile                    | Semua role           | Update nama/telp akun sendiri                                               |
 | PUT      | /api/v1/profile/password           | Semua role           | Ganti password akun sendiri                                                 |
 
-Dokumentasi lengkap (OpenAPI): `be/docs/swagger.yaml` — import ke [Swagger Editor](https://editor.swagger.io/) untuk tampilan interaktif.
+Dokumentasi lengkap (OpenAPI): `be-silapor/docs/swagger.yaml` — import ke [Swagger Editor](https://editor.swagger.io/) untuk tampilan interaktif.
 
 ---
 
@@ -222,7 +201,71 @@ Build untuk production:
 npm run build
 ```
 
-Hasil build ada di `fe-silapor/dist/`, siap di-deploy ke Vercel/Netlify/static hosting apa pun.
+Hasil build ada di `fe-silapor/dist/`.
+
+### Deploy ke VPS dengan Docker
+
+Project ini dijalankan di **VPS (self-hosted)** menggunakan **Docker** — bukan platform hosting pihak ketiga. Ada 3 file utama:
+
+```
+silapor-go-react/
+├── docker-compose.yml
+├── .env                    ← untuk docker-compose (copy dari .env.example)
+├── be-silapor/
+│   ├── Dockerfile
+│   ├── .dockerignore
+│   └── .env                ← env backend, tetap dipakai container (lihat langkah 3)
+└── fe-silapor/
+    ├── Dockerfile
+    ├── .dockerignore
+    └── nginx.conf
+```
+
+**Ringkasan tiap service:**
+
+- **`mysql`** — image `mysql:8.0`, data disimpan di volume `silapor-mysql-data` (persist walau container dihapus).
+- **`backend`** — di-build dari `be-silapor/Dockerfile` (multi-stage Go build), binary `migrate` CLI ikut di-bundle di image supaya migration bisa dijalankan dari dalam container. Folder upload disimpan di volume `silapor-uploads`.
+- **`frontend`** — di-build dari `fe-silapor/Dockerfile` (multi-stage: `npm run build` lalu di-serve pakai Nginx), termasuk `nginx.conf` khusus SPA (fallback semua route ke `index.html`).
+
+#### Langkah menjalankan
+
+1. Copy `.env.example` di root project menjadi `.env`, lalu sesuaikan `DB_PASSWORD`, `APP_PORT`, dan `VITE_API_BASE_URL` (arahkan ke domain/IP VPS kamu).
+2. Pastikan `be-silapor/.env` sudah ada (hasil `cp .env.example .env` di langkah 3) — nilai `DB_HOST` dan `DB_PORT` di sana akan **di-override otomatis** oleh `docker-compose.yml` supaya mengarah ke container `mysql`.
+3. Build & jalankan seluruh stack:
+   ```bash
+   docker compose up -d --build
+   ```
+4. Jalankan migration di dalam container backend (sekali saja, atau setiap ada migration baru):
+   ```bash
+   docker compose exec backend migrate -path database/migrations \
+     -database "mysql://root:${DB_PASSWORD}@tcp(mysql:3306)/${DB_NAME}" up
+   ```
+5. Jalankan seeder admin (sekali saja, saat pertama kali setup):
+   ```bash
+   docker compose exec backend go run database/seed/seed.go
+   ```
+   > Jika binary `go` tidak tersedia di image runtime, jalankan seeder sebelum build image (lokal) atau tambahkan langkah seeding terpisah di image builder.
+6. Cek status semua container:
+   ```bash
+   docker compose ps
+   ```
+7. Akses aplikasi:
+   - Frontend: `http://IP_VPS:8080`
+   - Backend health check: `http://IP_VPS:${APP_PORT}/health`
+
+#### Reverse proxy & domain (opsional, direkomendasikan)
+
+Untuk production sebaiknya taruh **Nginx atau Caddy** di level VPS (di luar Docker, atau sebagai container tambahan) sebagai reverse proxy ke port `8080` (frontend) dan `${APP_PORT}` (backend), sekaligus menangani SSL lewat Let's Encrypt/Certbot.
+
+#### Perintah Docker yang sering dipakai
+
+```bash
+docker compose logs -f backend      # lihat log backend realtime
+docker compose logs -f frontend     # lihat log frontend realtime
+docker compose down                 # stop semua container (data volume tetap aman)
+docker compose down -v              # stop semua container + hapus volume (data hilang!)
+docker compose up -d --build backend  # rebuild ulang backend saja setelah ada perubahan kode
+```
 
 ---
 
@@ -246,14 +289,14 @@ Setiap layer punya tanggung jawab terpisah agar mudah di-maintain dan dikembangk
 
 ## 7. Troubleshooting
 
-- **`Error 1146: Table 'silapor.xxx' doesn't exist`** → migration belum dijalankan. Jalankan perintah `migrate -path database/migrations -database "..." up` di langkah 2 terlebih dahulu.
-- **Connection refused ke MySQL** → pastikan service MySQL jalan & `.env` benar.
-- **CORS error di frontend** → pastikan backend jalan dan `VITE_API_BASE_URL` sesuai.
-- **Upload foto gagal** → pastikan folder `be/uploads/` ada (dibuat otomatis saat `main.go` start) dan `MAX_UPLOAD_MB` di `.env` cukup besar.
-- **Token invalid terus** → pastikan header `Authorization: Bearer <token>` terkirim (otomatis lewat axios interceptor di frontend).
-- **`x509: certificate signed by unknown authority`** → biasanya karena `DB_SSL_MODE=verify-ca` tapi file CA certificate salah/tidak ada. Cek ulang `DB_SSL_CA_PATH`, atau ganti sementara ke `DB_SSL_MODE=skip-verify`.
-- **`this server does not support TLS-required` / koneksi ke Aiven ditolak** → pastikan `DB_SSL_MODE` di `.env` **bukan** `disable`. Aiven mewajibkan koneksi TLS.
-- **Migration ke Aiven gagal dengan error TLS** → pastikan menambahkan `?tls=skip-verify` (atau sesuai) di connection string `migrate`, lihat langkah 2b.
+| Masalah                                         | Solusi                                                                                                                      |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `Error 1146: Table 'silapor.xxx' doesn't exist` | Migration belum dijalankan. Jalankan `migrate -path database/migrations -database "..." up` (lihat langkah 2).              |
+| Connection refused ke MySQL                     | Pastikan service MySQL jalan & kredensial di `.env` sudah benar.                                                            |
+| CORS error di frontend                          | Pastikan backend jalan dan `VITE_API_BASE_URL` di `.env` frontend sudah sesuai.                                             |
+| Upload foto gagal                               | Pastikan folder `be-silapor/uploads/` ada (dibuat otomatis saat `main.go` start) dan `MAX_UPLOAD_MB` di `.env` cukup besar. |
+| Token invalid terus                             | Pastikan header `Authorization: Bearer <token>` terkirim (otomatis lewat axios interceptor di frontend).                    |
+| `Access denied for user 'root'@'localhost'`     | Cek kembali `DB_USER` dan `DB_PASSWORD` di `.env` sesuai konfigurasi MySQL lokal Anda.                                      |
 
 ---
 

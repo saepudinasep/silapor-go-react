@@ -1,0 +1,72 @@
+services:
+  # =========================================================
+  # MySQL
+  # =========================================================
+  mysql:
+    image: mysql:8.0
+    container_name: silapor-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    ports:
+      - '3306:3306'
+    volumes:
+      - silapor-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p${DB_PASSWORD}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - silapor-network
+
+  # =========================================================
+  # Backend (Go + Fiber)
+  # =========================================================
+  backend:
+    build:
+      context: ./be-silapor
+      dockerfile: Dockerfile
+    container_name: silapor-backend
+    restart: unless-stopped
+    env_file:
+      - ./be-silapor/.env
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+    ports:
+      - '${APP_PORT}:${APP_PORT}'
+    volumes:
+      - silapor-uploads:/app/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - silapor-network
+
+  # =========================================================
+  # Frontend (React + Vite, di-serve via Nginx)
+  # =========================================================
+  frontend:
+    build:
+      context: ./fe-silapor
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    container_name: silapor-frontend
+    restart: unless-stopped
+    ports:
+      - '8080:80'
+    depends_on:
+      - backend
+    networks:
+      - silapor-network
+
+networks:
+  silapor-network:
+    driver: bridge
+
+volumes:
+  silapor-mysql-data:
+  silapor-uploads:

@@ -4,9 +4,9 @@ info:
   description: >
     REST API Sistem Informasi Pelaporan (Pengaduan) Masyarakat.
     Role: Masyarakat (pelapor), Petugas (menanggapi), Admin (kelola petugas).
-  version: "1.0.0"
+  version: '1.0.0'
 servers:
-  - url: http://localhost:8080/api/v1
+  - url: http://localhost:8081/api/v1
 
 paths:
   /public/beranda:
@@ -18,10 +18,7 @@ paths:
         dan isi laporan dipotong maksimal 140 karakter demi privasi.
       tags: [Public]
       responses:
-        "200":
-          {
-            description: "{ summary: {total,baru,proses,selesai}, recent: [...] }",
-          }
+        '200': { description: '{ summary: {total,baru,proses,selesai}, recent: [...] }' }
 
   /auth/masyarakat/register:
     post:
@@ -34,14 +31,14 @@ paths:
             schema:
               type: object
               properties:
-                nik: { type: string, example: "3271010101990001" }
+                nik: { type: string, example: '3271010101990001' }
                 nama: { type: string }
                 username: { type: string }
                 password: { type: string }
                 telp: { type: string }
       responses:
-        "201": { description: Registrasi berhasil }
-        "400": { description: NIK/username sudah terdaftar }
+        '201': { description: Registrasi berhasil }
+        '400': { description: NIK/username sudah terdaftar }
 
   /auth/masyarakat/login:
     post:
@@ -57,7 +54,7 @@ paths:
                 username: { type: string }
                 password: { type: string }
       responses:
-        "200": { description: Login berhasil, mengembalikan token JWT }
+        '200': { description: Login berhasil, mengembalikan token JWT }
 
   /auth/petugas/login:
     post:
@@ -73,7 +70,7 @@ paths:
                 username: { type: string }
                 password: { type: string }
       responses:
-        "200": { description: Login berhasil, mengembalikan token JWT }
+        '200': { description: Login berhasil, mengembalikan token JWT }
 
   /pengaduan:
     post:
@@ -90,7 +87,7 @@ paths:
                 isi_laporan: { type: string }
                 foto: { type: string, format: binary }
       responses:
-        "201": { description: Pengaduan berhasil dikirim }
+        '201': { description: Pengaduan berhasil dikirim }
     get:
       summary: List semua pengaduan (petugas/admin), filter opsional status & rentang tanggal
       tags: [Pengaduan]
@@ -108,7 +105,7 @@ paths:
           description: Format YYYY-MM-DD
           schema: { type: string }
       responses:
-        "200": { description: Daftar pengaduan }
+        '200': { description: Daftar pengaduan }
 
   /pengaduan/saya:
     get:
@@ -116,7 +113,7 @@ paths:
       tags: [Pengaduan]
       security: [{ bearerAuth: [] }]
       responses:
-        "200": { description: Daftar pengaduan milik sendiri }
+        '200': { description: Daftar pengaduan milik sendiri }
 
   /pengaduan/summary:
     get:
@@ -124,7 +121,7 @@ paths:
       tags: [Pengaduan]
       security: [{ bearerAuth: [] }]
       responses:
-        "200": { description: "{ baru, proses, selesai }" }
+        '200': { description: '{ baru, proses, selesai }' }
 
   /pengaduan/{id}:
     get:
@@ -134,7 +131,7 @@ paths:
       parameters:
         - { name: id, in: path, required: true, schema: { type: integer } }
       responses:
-        "200": { description: Detail pengaduan }
+        '200': { description: Detail pengaduan }
     delete:
       summary: Hapus pengaduan (admin)
       tags: [Pengaduan]
@@ -142,7 +139,7 @@ paths:
       parameters:
         - { name: id, in: path, required: true, schema: { type: integer } }
       responses:
-        "200": { description: Pengaduan dihapus }
+        '200': { description: Pengaduan dihapus }
 
   /pengaduan/{id}/status:
     put:
@@ -160,7 +157,7 @@ paths:
               properties:
                 status: { type: string, enum: [baru, proses, selesai] }
       responses:
-        "200": { description: Status diperbarui }
+        '200': { description: Status diperbarui }
 
   /pengaduan/{id}/tanggapan:
     get:
@@ -170,7 +167,7 @@ paths:
       parameters:
         - { name: id, in: path, required: true, schema: { type: integer } }
       responses:
-        "200": { description: Daftar tanggapan }
+        '200': { description: Daftar tanggapan }
     post:
       summary: Tambah tanggapan (petugas/admin)
       tags: [Tanggapan]
@@ -186,7 +183,7 @@ paths:
               properties:
                 tanggapan: { type: string }
       responses:
-        "201":
+        '201':
           {
             description: Tanggapan ditambahkan; status pengaduan otomatis jadi "proses" jika masih "baru",
           }
@@ -199,7 +196,7 @@ paths:
       parameters:
         - { name: id, in: path, required: true, schema: { type: integer } }
       responses:
-        "200": { description: Tanggapan dihapus }
+        '200': { description: Tanggapan dihapus }
 
   /petugas:
     post:
@@ -219,13 +216,13 @@ paths:
                 telp: { type: string }
                 level: { type: string, enum: [admin, petugas] }
       responses:
-        "201": { description: Petugas ditambahkan }
+        '201': { description: Petugas ditambahkan }
     get:
       summary: List semua petugas (admin)
       tags: [Petugas]
       security: [{ bearerAuth: [] }]
       responses:
-        "200": { description: Daftar petugas }
+        '200': { description: Daftar petugas }
 
   /petugas/{id}:
     put:
@@ -235,7 +232,7 @@ paths:
       parameters:
         - { name: id, in: path, required: true, schema: { type: integer } }
       responses:
-        "200": { description: Petugas diperbarui }
+        '200': { description: Petugas diperbarui }
     delete:
       summary: Hapus petugas (admin)
       tags: [Petugas]
@@ -243,7 +240,7 @@ paths:
       parameters:
         - { name: id, in: path, required: true, schema: { type: integer } }
       responses:
-        "200": { description: Petugas dihapus }
+        '200': { description: Petugas dihapus }
 
   /petugas/{id}/reset-password:
     put:
@@ -261,7 +258,7 @@ paths:
               properties:
                 password: { type: string }
       responses:
-        "200": { description: Password direset }
+        '200': { description: Password direset }
 
   /profile:
     get:
@@ -269,7 +266,7 @@ paths:
       tags: [Profile]
       security: [{ bearerAuth: [] }]
       responses:
-        "200": { description: Data profil }
+        '200': { description: Data profil }
     put:
       summary: Update nama/telp akun sendiri (semua role)
       tags: [Profile]
@@ -284,7 +281,7 @@ paths:
                 nama: { type: string }
                 telp: { type: string }
       responses:
-        "200": { description: Profil diperbarui }
+        '200': { description: Profil diperbarui }
 
   /profile/password:
     put:
@@ -301,8 +298,8 @@ paths:
                 password_lama: { type: string }
                 password_baru: { type: string }
       responses:
-        "200": { description: Password diperbarui }
-        "400": { description: Password lama tidak sesuai }
+        '200': { description: Password diperbarui }
+        '400': { description: Password lama tidak sesuai }
 
 components:
   securitySchemes:
