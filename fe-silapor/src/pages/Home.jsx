@@ -101,6 +101,100 @@ export default function Home() {
             Lihat Pengaduan Warga
           </button>
         </div>
+
+        <div className='hero-visual'>
+          <div className='hero-visual-glow'></div>
+
+          <div className='hero-dashboard'>
+            <div className='hero-dashboard-header'>
+              <div>
+                <span className='dashboard-eyebrow'>SILAPOR DESA MAJU</span>
+                <h3>Ringkasan Pengaduan</h3>
+              </div>
+              <span className='dashboard-live'>
+                <span></span> Layanan Aktif
+              </span>
+            </div>
+
+            <div className='dashboard-summary'>
+              <div className='dashboard-summary-icon'>📋</div>
+              <div>
+                <span>Transparansi Laporan</span>
+                <strong>Pantau Setiap Proses</strong>
+              </div>
+            </div>
+
+            <div className='dashboard-stats'>
+              <div className='dashboard-stat'>
+                <span className='stat-icon stat-blue'>📨</span>
+                <span className='stat-label'>Laporan Baru</span>
+                <strong>{loading ? '–' : summary.baru}</strong>
+              </div>
+
+              <div className='dashboard-stat'>
+                <span className='stat-icon stat-orange'>⚙️</span>
+                <span className='stat-label'>Diproses</span>
+                <strong>{loading ? '–' : summary.proses}</strong>
+              </div>
+
+              <div className='dashboard-stat'>
+                <span className='stat-icon stat-green'>✓</span>
+                <span className='stat-label'>Selesai</span>
+                <strong>{loading ? '–' : summary.selesai}</strong>
+              </div>
+            </div>
+
+            <div className='dashboard-activity'>
+              <div className='activity-heading'>
+                <strong>Alur Penanganan</strong>
+                <span>3 Tahapan</span>
+              </div>
+
+              <div className='activity-item'>
+                <span className='activity-number activity-blue'>01</span>
+                <div>
+                  <strong>Laporan Diterima</strong>
+                  <small>Pengaduan masuk ke sistem</small>
+                </div>
+                <span className='activity-check'>✓</span>
+              </div>
+
+              <div className='activity-item'>
+                <span className='activity-number activity-orange'>02</span>
+                <div>
+                  <strong>Dalam Penanganan</strong>
+                  <small>Petugas menindaklanjuti laporan</small>
+                </div>
+                <span className='activity-dot'></span>
+              </div>
+
+              <div className='activity-item'>
+                <span className='activity-number activity-green'>03</span>
+                <div>
+                  <strong>Laporan Diselesaikan</strong>
+                  <small>Hasil penanganan dapat dipantau</small>
+                </div>
+                <span className='activity-pending'>•••</span>
+              </div>
+            </div>
+
+            <div className='dashboard-footer'>
+              <span className='footer-shield'>✓</span>
+              <div>
+                <strong>Pelayanan Lebih Transparan</strong>
+                <small>Untuk Desa Maju yang lebih baik</small>
+              </div>
+            </div>
+          </div>
+
+          <div className='hero-floating-card'>
+            <span className='floating-icon'>🛡️</span>
+            <div>
+              <strong>Aman & Terpercaya</strong>
+              <small>Layanan resmi desa</small>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* ── STATISTIK ── */}

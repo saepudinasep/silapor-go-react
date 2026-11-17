@@ -134,10 +134,10 @@ go run database/seed/seed.go   # buat akun admin awal
 go run main.go
 ```
 
-Backend berjalan di `http://localhost:8080`. Cek dengan:
+Backend berjalan di `http://localhost:8081`. Cek dengan:
 
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:8081/health
 ```
 
 Akun admin default (sesuai `.env`): `admin` / `admin12345` (ubah `SEED_ADMIN_USERNAME` & `SEED_ADMIN_PASSWORD` sebelum seeding jika perlu).
@@ -180,7 +180,7 @@ npm install
 npm run dev
 ```
 
-Frontend berjalan di `http://localhost:5173`. Pastikan `VITE_API_BASE_URL` di `.env` mengarah ke backend (`http://localhost:8080/api/v1`).
+Frontend berjalan di `http://localhost:5173`. Pastikan `VITE_API_BASE_URL` di `.env` mengarah ke backend (`http://localhost:8081/api/v1`).
 
 ### Alur halaman
 
@@ -250,12 +250,12 @@ silapor-go-react/
    docker compose ps
    ```
 7. Akses aplikasi:
-   - Frontend: `http://IP_VPS:8080`
+   - Frontend: `http://IP_VPS:8081`
    - Backend health check: `http://IP_VPS:${APP_PORT}/health`
 
 #### Reverse proxy & domain (opsional, direkomendasikan)
 
-Untuk production sebaiknya taruh **Nginx atau Caddy** di level VPS (di luar Docker, atau sebagai container tambahan) sebagai reverse proxy ke port `8080` (frontend) dan `${APP_PORT}` (backend), sekaligus menangani SSL lewat Let's Encrypt/Certbot.
+Untuk production sebaiknya taruh **Nginx atau Caddy** di level VPS (di luar Docker, atau sebagai container tambahan) sebagai reverse proxy ke port `8081` (frontend) dan `${APP_PORT}` (backend), sekaligus menangani SSL lewat Let's Encrypt/Certbot.
 
 #### Perintah Docker yang sering dipakai
 
